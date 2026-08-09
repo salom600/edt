@@ -76,9 +76,9 @@ jobs:
         run: |
           mkdir -p dist
           cp target/${{ matrix.target }}/release/edt${{ matrix.artifact_ext }} dist/edt${{ matrix.artifact_ext }}
-          cp README.md LICENSE THIRD_PARTY_NOTICES.md dist/ 2>/dev/null || true
-          tar -czf edt-${{ matrix.artifact_name }}.tar.gz -C dist .
-          sha256sum edt-${{ matrix.artifact_name }}.tar.gz > edt-${{ matrix.artifact_name }}.tar.gz.sha256
+          cp README.md LICENSE-MIT LICENSE-APACHE THIRD_PARTY_NOTICES.md dist/ 2>/dev/null || true
+          tar -czf ${{ matrix.artifact_name }}.tar.gz -C dist .
+          sha256sum ${{ matrix.artifact_name }}.tar.gz > ${{ matrix.artifact_name }}.tar.gz.sha256
 
       - name: Stage artifacts (Windows)
         if: runner.os == 'Windows'
@@ -87,11 +87,12 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Copy-Item target/${{ matrix.target }}/release/edt.exe dist/
           Copy-Item README.md dist/ -ErrorAction SilentlyContinue
-          Copy-Item LICENSE dist/ -ErrorAction SilentlyContinue
+          Copy-Item LICENSE-MIT dist/ -ErrorAction SilentlyContinue
+          Copy-Item LICENSE-APACHE dist/ -ErrorAction SilentlyContinue
           Copy-Item THIRD_PARTY_NOTICES.md dist/ -ErrorAction SilentlyContinue
-          Compress-Archive -Path dist/* -DestinationPath edt-${{ matrix.artifact_name }}.zip
-          $hash = (Get-FileHash edt-${{ matrix.artifact_name }}.zip -Algorithm SHA256).Hash
-          "$hash  edt-${{ matrix.artifact_name }}.zip" | Out-File -Encoding ascii edt-${{ matrix.artifact_name }}.zip.sha256
+          Compress-Archive -Path dist/* -DestinationPath ${{ matrix.artifact_name }}.zip
+          $hash = (Get-FileHash ${{ matrix.artifact_name }}.zip -Algorithm SHA256).Hash
+          "$hash  ${{ matrix.artifact_name }}.zip" | Out-File -Encoding ascii ${{ matrix.artifact_name }}.zip.sha256
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -181,9 +182,10 @@ jobs:
           name: edt ${{ steps.tag.outputs.name }}
           body_path: release-notes.md
           files: |
-            release-assets/edt-*.tar.gz
-            release-assets/edt-*.zip
-            release-assets/edt-*.sha256
+            release-assets/*.tar.gz
+            release-assets/*.tar.gz.sha256
+            release-assets/*.zip
+            release-assets/*.zip.sha256
           draft: false
           prerelease: ${{ contains(steps.tag.outputs.name, '-') }}
           fail_on_unmatched_files: true
