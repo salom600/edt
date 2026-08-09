@@ -1,0 +1,34 @@
+# Rust build artifacts
+/target
+**/target
+/Cargo.lock.bak
+
+# Editor / IDE
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local env / secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Local CI artifacts
+artifacts/
+dist/
+*.AppImage
+*.dmg
+*.msi
+*.exe
+*.deb
+*.tar.gz
+
+# Logs
+*.log
+target/

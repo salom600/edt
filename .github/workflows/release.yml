@@ -1,0 +1,193 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Build artifacts on each platform
+  # ---------------------------------------------------------------------
+  build:
+    name: build release (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: edt-linux-x86_64
+            artifact_ext: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: edt-windows-x86_64
+            artifact_ext: ".exe"
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: edt-macos-arm64
+            artifact_ext: ""
+          - os: macos-13
+            target: x86_64-apple-darwin
+            artifact_name: edt-macos-x86_64
+            artifact_ext: ""
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "."
+          key: release-${{ matrix.target }}
+
+      - name: Build release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Stage artifacts (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/edt${{ matrix.artifact_ext }} dist/edt${{ matrix.artifact_ext }}
+          cp README.md LICENSE THIRD_PARTY_NOTICES.md dist/ 2>/dev/null || true
+          tar -czf edt-${{ matrix.artifact_name }}.tar.gz -C dist .
+          sha256sum edt-${{ matrix.artifact_name }}.tar.gz > edt-${{ matrix.artifact_name }}.tar.gz.sha256
+
+      - name: Stage artifacts (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item target/${{ matrix.target }}/release/edt.exe dist/
+          Copy-Item README.md dist/ -ErrorAction SilentlyContinue
+          Copy-Item LICENSE dist/ -ErrorAction SilentlyContinue
+          Copy-Item THIRD_PARTY_NOTICES.md dist/ -ErrorAction SilentlyContinue
+          Compress-Archive -Path dist/* -DestinationPath edt-${{ matrix.artifact_name }}.zip
+          $hash = (Get-FileHash edt-${{ matrix.artifact_name }}.zip -Algorithm SHA256).Hash
+          "$hash  edt-${{ matrix.artifact_name }}.zip" | Out-File -Encoding ascii edt-${{ matrix.artifact_name }}.zip.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.artifact_name }}
+          path: |
+            edt-${{ matrix.artifact_name }}.*
+          if-no-files-found: error
+          retention-days: 90
+
+  # ---------------------------------------------------------------------
+  # Publish a GitHub Release with all artifacts attached
+  # ---------------------------------------------------------------------
+  release:
+    name: publish release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "name=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          pattern: release-*
+          merge-multiple: true
+
+      - name: List downloaded artifacts
+        run: ls -laR release-assets
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          cat > release-notes.md <<'EOF'
+          # edt ${{ steps.tag.outputs.name }}
+
+          ## Highlights
+
+          - Cross-platform video editor built in Rust (Windows, Linux, macOS)
+          - egui-based UI: media pool, preview, timeline, inspector panels
+          - ffmpeg-backed media probing, thumbnail generation, frame extraction
+          - JSON project save/load with atomic writes
+          - Export pipeline (concat or per-frame strategies)
+          - Undo/redo for add/delete/split/move clip operations
+          - 60-second autosave
+
+          ## Artifacts
+
+          - **Linux**: `edt-linux-x86_64.tar.gz`
+          - **Windows**: `edt-windows-x86_64.zip`
+          - **macOS (Apple Silicon)**: `edt-macos-arm64.tar.gz`
+          - **macOS (Intel)**: `edt-macos-x86_64.tar.gz`
+
+          Each artifact has a `.sha256` checksum file alongside it.
+
+          ## Prerequisites
+
+          **FFmpeg must be installed separately.** edt shells out to the
+          `ffmpeg` and `ffprobe` binaries on your PATH. Install from
+          https://ffmpeg.org/ or your OS package manager.
+
+          ## Known limitations
+
+          See [docs/known-issues.md](https://github.com/salom600/edt/blob/main/docs/known-issues.md).
+
+          ## Roadmap to v0.2
+
+          See [docs/roadmap.md](https://github.com/salom600/edt/blob/main/docs/roadmap.md).
+          EOF
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: edt ${{ steps.tag.outputs.name }}
+          body_path: release-notes.md
+          files: |
+            release-assets/edt-*.tar.gz
+            release-assets/edt-*.zip
+            release-assets/edt-*.sha256
+          draft: false
+          prerelease: ${{ contains(steps.tag.outputs.name, '-') }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true

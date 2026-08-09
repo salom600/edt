@@ -1,0 +1,20 @@
+[package]
+name = "edt-render"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Render pipeline for edt — frame composition from timeline state"
+
+[dependencies]
+edt-core.workspace = true
+edt-media.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+image.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

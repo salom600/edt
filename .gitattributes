@@ -1,0 +1,29 @@
+# Auto-detect text files and normalize line endings to LF on commit.
+* text=auto eol=lf
+
+# Rust source
+*.rs text eol=lf
+*.toml text eol=lf
+
+# Markdown / docs
+*.md text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Windows-specific files use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files — never normalize
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.icns binary
+*.ico binary
+*.zip binary
+*.tar.gz binary
+*.dmg binary
+*.msi binary
+*.exe binary

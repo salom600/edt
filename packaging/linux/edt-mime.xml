@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-edt-project">
+    <comment>edt video editor project</comment>
+    <comment xml:lang="en">edt video editor project</comment>
+    <glob pattern="*.edt.json"/>
+    <glob pattern="*.edtproj"/>
+  </mime-type>
+</mime-info>

@@ -1,0 +1,104 @@
+; NSIS installer script for edt
+; Requires: cargo build --release has been run (target/release/edt.exe exists)
+;
+; Build with:
+;   makensis packaging/windows/edt.nsis
+;
+; Output: packaging/windows/edt-0.1.0-setup.exe
+
+!define APP_NAME "edt"
+!define APP_VERSION "0.1.0"
+!define APP_PUBLISHER "salom600"
+!define APP_URL "https://github.com/salom600/edt"
+!define APP_EXE "edt.exe"
+!define APP_REGKEY "Software\edt"
+!define APP_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\edt"
+
+Name "${APP_NAME} ${APP_VERSION}"
+OutFile "edt-${APP_VERSION}-setup.exe"
+Unicode true
+InstallDir "$PROGRAMFILES64\${APP_NAME}"
+InstallDirRegKey HKLM "${APP_REGKEY}" "InstallDir"
+RequestExecutionLevel admin
+ShowInstDetails show
+ShowUnInstDetails show
+SetCompressor /SOLID lzma
+
+VIAddVersionKey "ProductName" "${APP_NAME}"
+VIAddVersionKey "FileDescription" "${APP_NAME} installer"
+VIAddVersionKey "CompanyName" "${APP_PUBLISHER}"
+VIAddVersionKey "LegalCopyright" "Copyright (c) 2026 ${APP_PUBLISHER}"
+VIAddVersionKey "FileVersion" "${APP_VERSION}"
+VIAddVersionKey "ProductVersion" "${APP_VERSION}"
+VIProductVersion "0.1.0.0"
+VIFileVersion "0.1.0.0"
+
+Page components
+Page directory
+Page instfiles
+UninstPage uninstConfirm
+UninstPage instfiles
+
+Section "edt (required)"
+  SectionIn RO
+  SetOutPath "$INSTDIR"
+  File "..\..\target\release\edt.exe"
+  File "..\..\README.md"
+  File "..\..\LICENSE-MIT"
+  File "..\..\LICENSE-APACHE"
+  File "..\..\THIRD_PARTY_NOTICES.md"
+
+  ; Store install path
+  WriteRegStr HKLM "${APP_REGKEY}" "InstallDir" "$INSTDIR"
+  WriteRegStr HKLM "${APP_REGKEY}" "Version" "${APP_VERSION}"
+
+  ; Add/uninstall info
+  WriteRegStr HKLM "${APP_UNINST_KEY}" "DisplayName" "${APP_NAME}"
+  WriteRegStr HKLM "${APP_UNINST_KEY}" "DisplayVersion" "${APP_VERSION}"
+  WriteRegStr HKLM "${APP_UNINST_KEY}" "Publisher" "${APP_PUBLISHER}"
+  WriteRegStr HKLM "${APP_UNINST_KEY}" "URLInfoAbout" "${APP_URL}"
+  WriteRegStr HKLM "${APP_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${APP_EXE}"
+  WriteRegStr HKLM "${APP_UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKLM "${APP_UNINST_KEY}" "NoModify" 1
+  WriteRegDWORD HKLM "${APP_UNINST_KEY}" "NoRepair" 1
+
+  ; Start menu shortcuts
+  CreateDirectory "$SMPROGRAMS\${APP_NAME}"
+  CreateShortcut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}"
+  CreateShortcut "$SMPROGRAMS\${APP_NAME}\Uninstall ${APP_NAME}.lnk" "$INSTDIR\uninstall.exe"
+
+  ; Desktop shortcut (optional)
+  CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}"
+
+  ; Uninstaller
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+SectionEnd
+
+Section "Associate .edtproj files"
+  WriteRegStr HKCR ".edtproj" "" "edt.Project"
+  WriteRegStr HKCR ".edt.json" "" "edt.Project"
+  WriteRegStr HKCR "edt.Project" "" "edt Project File"
+  WriteRegStr HKCR "edt.Project\DefaultIcon" "" "$INSTDIR\${APP_EXE},0"
+  WriteRegStr HKCR "edt.Project\shell\open\command" "" '"$INSTDIR\${APP_EXE}" "%1"'
+SectionEnd
+
+Section "Uninstall"
+  Delete "$INSTDIR\${APP_EXE}"
+  Delete "$INSTDIR\README.md"
+  Delete "$INSTDIR\LICENSE-MIT"
+  Delete "$INSTDIR\LICENSE-APACHE"
+  Delete "$INSTDIR\THIRD_PARTY_NOTICES.md"
+  Delete "$INSTDIR\uninstall.exe"
+  RMDir "$INSTDIR"
+
+  Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
+  Delete "$SMPROGRAMS\${APP_NAME}\Uninstall ${APP_NAME}.lnk"
+  RMDir "$SMPROGRAMS\${APP_NAME}"
+  Delete "$DESKTOP\${APP_NAME}.lnk"
+
+  DeleteRegKey HKLM "${APP_UNINST_KEY}"
+  DeleteRegKey HKLM "${APP_REGKEY}"
+  DeleteRegKey HKCR ".edtproj"
+  DeleteRegKey HKCR ".edt.json"
+  DeleteRegKey HKCR "edt.Project"
+SectionEnd

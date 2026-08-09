@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "v*"]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Lint + test job — runs on Linux, fast feedback for fmt + clippy + tests
+  # ---------------------------------------------------------------------
+  lint-test:
+    name: fmt + clippy + test (ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "."
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo test
+        run: cargo test --workspace --no-fail-fast
+        env:
+          RUSTFLAGS: ""
+
+      - name: cargo doc
+        run: cargo doc --workspace --no-deps
+        env:
+          RUSTFLAGS: ""
+
+  # ---------------------------------------------------------------------
+  # Per-platform build job — produces artifacts
+  # ---------------------------------------------------------------------
+  build:
+    name: build (${{ matrix.os }})
+    needs: lint-test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: edt-linux-x86_64
+            artifact_ext: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: edt-windows-x86_64
+            artifact_ext: ".exe"
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: edt-macos-arm64
+            artifact_ext: ""
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "."
+          key: ${{ matrix.target }}
+
+      - name: Build release
+        run: cargo build --release --target ${{ matrix.target }}
+        env:
+          RUSTFLAGS: "-D warnings"
+
+      - name: Stage artifacts (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/edt${{ matrix.artifact_ext }} dist/edt${{ matrix.artifact_ext }}
+          cd dist && tar -czf ../edt-${{ matrix.artifact_name }}.tar.gz edt${{ matrix.artifact_ext }} && cd ..
+          mv edt-${{ matrix.artifact_name }}.tar.gz edt-${{ matrix.artifact_name }}.tar.gz
+          sha256sum edt-${{ matrix.artifact_name }}.tar.gz > edt-${{ matrix.artifact_name }}.tar.gz.sha256
+
+      - name: Stage artifacts (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path target/${{ matrix.target }}/release/edt.exe -DestinationPath edt-${{ matrix.artifact_name }}.zip
+          $hash = (Get-FileHash edt-${{ matrix.artifact_name }}.zip -Algorithm SHA256).Hash
+          "$hash  edt-${{ matrix.artifact_name }}.zip" | Out-File -Encoding ascii edt-${{ matrix.artifact_name }}.zip.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            edt-${{ matrix.artifact_name }}.*
+            dist/edt${{ matrix.artifact_ext }}
+          if-no-files-found: error
+          retention-days: 30

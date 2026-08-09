@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=edt
+GenericName=Video Editor
+Comment=Modern cross-platform video editor
+Exec=edt %F
+Icon=edt
+Terminal=false
+Categories=AudioVideo;Video;AudioVideoEditing;
+MimeType=video/mp4;video/x-matroska;video/quicktime;video/x-msvideo;video/webm;audio/wav;audio/mpeg;audio/x-flac;image/png;image/jpeg;
+Keywords=video;editor;nonlinear;nle;ffmpeg;
+StartupNotify=true
+StartupWMClass=edt
