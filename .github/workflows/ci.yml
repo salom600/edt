@@ -116,8 +116,7 @@ jobs:
         run: |
           mkdir -p dist
           cp target/${{ matrix.target }}/release/edt${{ matrix.artifact_ext }} dist/edt${{ matrix.artifact_ext }}
-          cd dist && tar -czf ../edt-${{ matrix.artifact_name }}.tar.gz edt${{ matrix.artifact_ext }} && cd ..
-          mv edt-${{ matrix.artifact_name }}.tar.gz edt-${{ matrix.artifact_name }}.tar.gz
+          tar -czf edt-${{ matrix.artifact_name }}.tar.gz -C dist .
           sha256sum edt-${{ matrix.artifact_name }}.tar.gz > edt-${{ matrix.artifact_name }}.tar.gz.sha256
 
       - name: Stage artifacts (Windows)
