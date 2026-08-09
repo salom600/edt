@@ -38,10 +38,6 @@ jobs:
             target: aarch64-apple-darwin
             artifact_name: edt-macos-arm64
             artifact_ext: ""
-          - os: macos-13
-            target: x86_64-apple-darwin
-            artifact_name: edt-macos-x86_64
-            artifact_ext: ""
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -158,7 +154,8 @@ jobs:
           - **Linux**: `edt-linux-x86_64.tar.gz`
           - **Windows**: `edt-windows-x86_64.zip`
           - **macOS (Apple Silicon)**: `edt-macos-arm64.tar.gz`
-          - **macOS (Intel)**: `edt-macos-x86_64.tar.gz`
+
+          Intel macOS users can build from source: `cargo install --git https://github.com/salom600/edt`.
 
           Each artifact has a `.sha256` checksum file alongside it.
 
