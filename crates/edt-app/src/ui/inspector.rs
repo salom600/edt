@@ -82,7 +82,7 @@ fn render_clip_props(app: &mut EdtApp, ui: &mut Ui, clip_id: edt_core::id::Id) {
         for i in 0..8u8 {
             let color = label_color(i);
             let selected = snapshot.label == i;
-            let btn = egui::RadioButton::new(selected, "").fill(color);
+            let btn = egui::RadioButton::new(selected, "");
             if ui.add(btn).clicked() {
                 let mut s = app.state.write();
                 if let Some(tid) = s.project.timeline.track_of_clip(clip_id) {
@@ -94,6 +94,14 @@ fn render_clip_props(app: &mut EdtApp, ui: &mut Ui, clip_id: edt_core::id::Id) {
                     }
                 }
             }
+            // Draw the color swatch beside the radio button.
+            let cursor = ui.cursor();
+            let swatch_rect = egui::Rect::from_min_size(
+                egui::pos2(cursor.max.x - 10.0, cursor.min.y + 4.0),
+                egui::vec2(10.0, 10.0),
+            );
+            ui.painter().rect_filled(swatch_rect, 2.0, color);
+            ui.add_space(14.0);
         }
     });
 

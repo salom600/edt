@@ -60,7 +60,7 @@ impl ProjectFile {
 }
 
 /// The project — the root of all editor state.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Project {
     pub settings: ProjectSettings,
     #[serde(default)]
@@ -73,18 +73,6 @@ pub struct Project {
     /// Absolute path the project was last saved to. `None` if never saved.
     #[serde(skip)]
     pub last_save_path: Option<std::path::PathBuf>,
-}
-
-impl Default for Project {
-    fn default() -> Self {
-        Self {
-            settings: ProjectSettings::default(),
-            assets: Vec::new(),
-            timeline: Timeline::default(),
-            export: ExportSettings::default(),
-            last_save_path: None,
-        }
-    }
 }
 
 impl Project {

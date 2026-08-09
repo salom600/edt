@@ -126,7 +126,7 @@ impl IdGenerator {
         use std::time::{SystemTime, UNIX_EPOCH};
         let nanos = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .map(|d| d.as_nanos() as u128)
+            .map(|d| d.as_nanos())
             .unwrap_or(0xdead_beef_cafe_babe);
         let pid = std::process::id() as u128;
         // Mix in a static counter to add additional dispersion across

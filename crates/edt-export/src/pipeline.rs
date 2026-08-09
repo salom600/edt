@@ -289,7 +289,7 @@ fn export_via_frame_pipe(
 fn color_for_asset(asset: &edt_core::media::MediaAsset) -> image::Rgba<u8> {
     // Deterministic color derived from asset id.
     let id = asset.id.0;
-    let r = ((id >> 0) & 0xff) as u8;
+    let r = (id & 0xff) as u8;
     let g = ((id >> 8) & 0xff) as u8;
     let b = ((id >> 16) & 0xff) as u8;
     image::Rgba([r, g, b, 255])
@@ -430,7 +430,7 @@ mod tests {
         let (p, _) = Project::new();
         let opts = ExportOptions::new(
             ExportSettings::default(),
-            Path::new("/tmp/out.mp4").to_path_buf(),
+            std::path::Path::new("/tmp/out.mp4").to_path_buf(),
         );
         let progress = ProgressUpdate::new(0);
         let err = export_project(&p, &opts, progress).unwrap_err();
@@ -453,11 +453,5 @@ mod tests {
         let c1 = color_for_asset(&asset);
         let c2 = color_for_asset(&asset);
         assert_eq!(c1, c2);
-    }
-
-    // Suppress unused-import warning when the test cfg doesn't exercise it.
-    #[test]
-    fn media_kind_compiles() {
-        let _ = MediaKind::Video;
     }
 }

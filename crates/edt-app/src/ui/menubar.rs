@@ -98,22 +98,23 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         });
 
         ui.menu_button("Playback", |ui| {
-            let mut s = app.state.write();
             if ui.button("Play/Pause (Space)").clicked() {
-                s.toggle_play();
+                app.state.write().toggle_play();
                 ui.close_menu();
             }
             if ui.button("Stop").clicked() {
-                s.stop();
+                app.state.write().stop();
                 ui.close_menu();
             }
             ui.separator();
             if ui.button("Step Forward (→)").clicked() {
-                s.nudge_playhead(1.0 / s.project.settings.fps);
+                let fps = app.state.read().project.settings.fps;
+                app.state.write().nudge_playhead(1.0 / fps);
                 ui.close_menu();
             }
             if ui.button("Step Backward (←)").clicked() {
-                s.nudge_playhead(-1.0 / s.project.settings.fps);
+                let fps = app.state.read().project.settings.fps;
+                app.state.write().nudge_playhead(-1.0 / fps);
                 ui.close_menu();
             }
         });

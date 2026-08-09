@@ -8,7 +8,9 @@ pub mod preview;
 pub mod styles;
 pub mod timeline;
 
-use crate::app::EdtApp;
+pub use media_pool::ThumbCache;
+pub use styles::label_color;
+
 use egui::{Color32, Context, Ui};
 
 /// The edt dark theme palette.
@@ -28,7 +30,7 @@ pub const SELECTION: Color32 = Color32::from_rgb(250, 250, 100);
 pub fn apply_theme(ctx: &Context) {
     let mut style: egui::Style = (*ctx.style()).clone();
     style.spacing.item_spacing = egui::vec2(6.0, 4.0);
-    style.spacing.window_margin = egui::Margin::same(8);
+    style.spacing.window_margin = egui::Margin::same(8.0);
     ctx.set_style(style);
 
     let mut visuals = egui::Visuals::dark();
@@ -56,9 +58,4 @@ pub fn panel_header(ui: &mut Ui, title: &str) {
         ui.label(egui::RichText::new(title).strong().color(TEXT).size(13.0));
     });
     ui.separator();
-}
-
-/// Reference to the EdtApp for panel rendering.
-pub trait AppRef {
-    fn app(&self) -> &EdtApp;
 }

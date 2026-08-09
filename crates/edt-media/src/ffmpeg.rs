@@ -92,6 +92,7 @@ fn which(bin: &str) -> Option<PathBuf> {
 }
 
 /// Run an ffmpeg command and check the exit status.
+#[allow(dead_code)]
 pub(crate) fn run_ffmpeg(args: &[&str]) -> Result<(), FfmpegError> {
     let paths = find_ffmpeg()?;
     let output = Command::new(&paths.ffmpeg).args(args).output()?;

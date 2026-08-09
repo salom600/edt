@@ -148,7 +148,7 @@ impl EditorStateInner {
             return None;
         }
         let pos = track.clips.iter().position(|c| c.id == sel)?;
-        let new_id = {
+        let new_clip = {
             let clip = &mut track.clips[pos];
             clip.split(next_id, self.playhead)?
         };

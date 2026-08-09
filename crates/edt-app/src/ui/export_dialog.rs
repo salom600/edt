@@ -260,7 +260,7 @@ fn render_progress(app: &mut EdtApp, ui: &mut Ui) {
     let frac = if prog.frames_total == 0 {
         0.0
     } else {
-        prog.fraction()
+        prog.fraction() as f32
     };
     ui.add(egui::ProgressBar::new(frac).text(format!(
         "{}%  ({}/{})",

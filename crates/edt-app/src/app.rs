@@ -366,7 +366,7 @@ impl EdtApp {
                     Ok(img) => {
                         let handle = media_pool::upload_texture(ctx, &img);
                         let fps = self.state.read().project.settings.fps;
-                        let key = (time.0 * fps).round() / fps;
+                        let key = (time.0 * fps).round() as u64;
                         if self.preview_cache.frames.len() >= 32 {
                             self.preview_cache.frames.clear();
                         }
@@ -473,14 +473,14 @@ impl EdtApp {
     }
 
     fn handle_shortcuts(&mut self, ctx: &Context) {
-        // Detect when an input field is focused so we don't hijack typing.
-        let any_focused = ctx.memory(|m| {
-            m.focused().is_some_and(|id| {
-                let opts = m.options.get(&id);
-                opts.is_some()
-            })
-        });
-        if any_focused {
+        // Detect when a text input field is focused so we don't hijack typing.
+        // We approximate "text input focused" by checking whether any widget
+        // has focus AND no modifier keys are down — single-letter shortcuts
+        // (Space, S, Delete, arrows) without Ctrl are likely typing into a
+        // text field if focus is set.
+        let any_focus = ctx.memory(|m| m.focused().is_some());
+        let any_modifier_down = ctx.input(|i| i.modifiers.any());
+        if any_focus && !any_modifier_down {
             return;
         }
         ctx.input(|i| {

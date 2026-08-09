@@ -145,9 +145,7 @@ impl MediaAsset {
 
     /// Effective path used for editing operations (proxy if set, else original).
     pub fn editing_path(&self) -> &std::path::Path {
-        self.proxy_path
-            .as_deref()
-            .unwrap_or_else(|| self.path.as_path())
+        self.proxy_path.as_deref().unwrap_or(self.path.as_path())
     }
 }
 

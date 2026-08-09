@@ -233,7 +233,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
             let mut color = if is_video { TRACK_VIDEO } else { TRACK_AUDIO };
             let is_selected = matches!(snapshot.selection, Selection::Clip(id) if id == clip.id);
             if is_selected {
-                color = color.lighten(0.4);
+                color = color.gamma_multiply(1.4);
             }
             painter.rect_filled(clip_rect, 2.0, color);
             // Label color stripe.
@@ -303,11 +303,11 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
             egui::pos2(playhead_x + 5.0, ruler_rect.min.y),
             egui::pos2(playhead_x, ruler_rect.min.y + 6.0),
         ];
-        painter.add(egui::Shape::convex_polygon {
-            points: tri,
-            fill: PLAYHEAD,
-            stroke: egui::Stroke::NONE,
-        });
+        painter.add(egui::Shape::convex_polygon(
+            tri,
+            PLAYHEAD,
+            egui::Stroke::NONE,
+        ));
     }
 
     // ---- Interaction ----
@@ -389,7 +389,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                     }
                 } else {
                     // Click on empty canvas: scrub playhead.
-                    let t = snapshot.scroll + ((p.x - body_rect.min.x) / snapshot.zoom) as f64;
+                    let t = snapshot.scroll + ((p.x - body_rect.min.x) as f64 / snapshot.zoom);
                     let mut s = app.state.write();
                     s.playhead = edt_core::time::Time(t.max(0.0));
                     s.selection = Selection::None;
@@ -459,7 +459,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                         }
                     }
                     DragKind::Scrub => {
-                        let t = snapshot.scroll + ((p.x - body_rect.min.x) / snapshot.zoom) as f64;
+                        let t = snapshot.scroll + ((p.x - body_rect.min.x) as f64 / snapshot.zoom);
                         app.state.write().playhead = edt_core::time::Time(t.max(0.0));
                     }
                     DragKind::None => {}
@@ -483,7 +483,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                     egui::vec2(canvas_w, TRACK_H),
                 );
                 if track_rect.contains(p) && !track.locked {
-                    let t = snapshot.scroll + ((p.x - body_rect.min.x) / snapshot.zoom) as f64;
+                    let t = snapshot.scroll + ((p.x - body_rect.min.x) as f64 / snapshot.zoom);
                     let next_id = app.state.next_id();
                     app.state.write().add_clip_from_asset(
                         asset_id,

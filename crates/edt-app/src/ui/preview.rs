@@ -8,12 +8,12 @@ use egui::{Color32, Context, Sense, Ui};
 use std::collections::HashMap;
 use std::time::Instant;
 
-/// Cache of decoded preview frames keyed by their timeline time.
+/// Cache of decoded preview frames keyed by their timeline frame index.
 /// The cache holds at most `CAP` entries (LRU eviction is approximate —
 /// we just drop everything when full for simplicity).
 pub struct PreviewCache {
-    pub frames: HashMap<f64, egui::TextureHandle>,
-    pub last_request: Option<f64>,
+    pub frames: HashMap<u64, egui::TextureHandle>,
+    pub last_request: Option<u64>,
     pub last_request_at: Option<Instant>,
 }
 
@@ -33,7 +33,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
     panel_header(ui, "Preview");
 
     // Snapshot what we need from state.
-    let (playhead, dur, fps, w, h, is_playing, has_clips, top_clip_path, top_clip_source_t) = {
+    let (playhead, dur, fps, w, h, is_playing, has_clips, top_clip) = {
         let s = app.state.read();
         let playhead = s.playhead.0;
         let dur = s.project.duration().0;
@@ -57,6 +57,8 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         }
         (playhead, dur, fps, w, h, is_playing, has_clips, top)
     };
+    let top_clip_path = top_clip.as_ref().map(|(p, _)| p.clone());
+    let top_clip_source_t = top_clip.as_ref().map(|(_, t)| *t);
 
     // ---- Preview canvas ----
     let available = ui.available_size();
@@ -79,8 +81,8 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
     let dst_rect = egui::Rect::from_center_size(canvas_rect.center(), egui::vec2(dst_w, dst_h));
 
     // Frame to display: look up cached frame for current playhead.
-    let frame_t = (playhead * fps).round() / fps; // snap to nearest frame
-    if let Some(handle) = app.preview_cache.frames.get(&frame_t) {
+    let frame_idx = (playhead * fps).round() as u64;
+    if let Some(handle) = app.preview_cache.frames.get(&frame_idx) {
         painter.image(
             handle.id(),
             dst_rect,
@@ -107,14 +109,15 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         // this time in the last 250ms.
         let now = Instant::now();
         let should_request = match app.preview_cache.last_request {
-            Some(t) if (t - frame_t).abs() < 1e-6 => false,
+            Some(t) if t == frame_idx => false,
             _ => match app.preview_cache.last_request_at {
                 Some(prev) => now.duration_since(prev).as_millis() > 250,
                 None => true,
             },
         };
         if should_request {
-            if let Some((path, src_t)) = top_clip_path {
+            if let Some(path) = top_clip_path {
+                let src_t = top_clip_source_t.unwrap_or(0.0);
                 let _ = app
                     .jobs
                     .tx
@@ -123,7 +126,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                         time: edt_core::time::Time(src_t),
                         max_width: 640,
                     });
-                app.preview_cache.last_request = Some(frame_t);
+                app.preview_cache.last_request = Some(frame_idx);
                 app.preview_cache.last_request_at = Some(now);
             }
         }
@@ -177,19 +180,14 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
             ui.separator();
 
             // Scrub slider.
-            let slider_w = ui.available_width().min(400.0);
             let mut t = playhead;
-            ui.add(
-                egui::Slider::new(&mut t, 0.0..=dur.max(0.001))
-                    .show_value(true)
-                    .text("s")
-                    .desired_width(slider_w)
-                    .clamping(egui::SliderClamping::Always),
-            )
-            .changed()
-            .then(|| {
+            let slider = egui::Slider::new(&mut t, 0.0..=dur.max(0.001))
+                .show_value(true)
+                .text("s")
+                .clamping(egui::SliderClamping::Always);
+            if ui.add(slider).changed() {
                 app.state.write().playhead = edt_core::time::Time(t);
-            });
+            }
         });
     });
 

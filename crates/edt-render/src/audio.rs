@@ -72,8 +72,8 @@ where
                     right.truncate(n);
                 }
             }
-            let track_level = track.level as f32;
-            let clip_level = clip.level as f32;
+            let track_level = track.level;
+            let clip_level = clip.level;
             let gain = track_level * clip_level;
             let n = left.len().min(out.frames());
             for i in 0..n {
