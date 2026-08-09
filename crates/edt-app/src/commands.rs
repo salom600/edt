@@ -220,10 +220,7 @@ mod tests {
     fn setup_with_clip() -> (Arc<EditorState>, Id, Id) {
         let state = EditorState::new();
         let asset_id = state.next_id();
-        let track_id = state
-            .read()
-            .first_track_of_kind(TrackKind::Video)
-            .unwrap();
+        let track_id = state.read().first_track_of_kind(TrackKind::Video).unwrap();
         let asset = MediaAsset {
             id: asset_id,
             name: "clip".into(),
@@ -259,20 +256,44 @@ mod tests {
         let (state, _track, _clip) = setup_with_clip();
         // The setup already added one clip. Test a second add via command.
         let asset_id = state.read().project.assets[0].id;
-        let track_id = state
-            .read()
-            .first_track_of_kind(TrackKind::Video)
-            .unwrap();
+        let track_id = state.read().first_track_of_kind(TrackKind::Video).unwrap();
         let next_id = state.next_id();
         let source = ClipSource::from_asset(&state.read().project.assets[0]);
         let new_clip = Clip::new(next_id, "clip2", source, Time(15.0));
         let mut undo = UndoStack::default();
-        let count_before = state.read().project.timeline.track(track_id).unwrap().clips.len();
-        undo.push(Box::new(AddClipCmd { clip: new_clip, track_id }), &state);
-        let count_after = state.read().project.timeline.track(track_id).unwrap().clips.len();
+        let count_before = state
+            .read()
+            .project
+            .timeline
+            .track(track_id)
+            .unwrap()
+            .clips
+            .len();
+        undo.push(
+            Box::new(AddClipCmd {
+                clip: new_clip,
+                track_id,
+            }),
+            &state,
+        );
+        let count_after = state
+            .read()
+            .project
+            .timeline
+            .track(track_id)
+            .unwrap()
+            .clips
+            .len();
         assert_eq!(count_after, count_before + 1);
         undo.undo(&state);
-        let count_undo = state.read().project.timeline.track(track_id).unwrap().clips.len();
+        let count_undo = state
+            .read()
+            .project
+            .timeline
+            .track(track_id)
+            .unwrap()
+            .clips
+            .len();
         assert_eq!(count_undo, count_before);
         let _ = asset_id; // suppress unused
     }
@@ -280,14 +301,8 @@ mod tests {
     #[test]
     fn move_clip_command_roundtrips() {
         let (state, track_id, clip_id) = setup_with_clip();
-        let old_start = state
-            .read()
-            .project
-            .timeline
-            .track(track_id)
-            .unwrap()
-            .clips[0]
-            .timeline_start;
+        let old_start =
+            state.read().project.timeline.track(track_id).unwrap().clips[0].timeline_start;
         let mut undo = UndoStack::default();
         undo.push(
             Box::new(MoveClipCmd {
@@ -298,24 +313,12 @@ mod tests {
             }),
             &state,
         );
-        let new_start = state
-            .read()
-            .project
-            .timeline
-            .track(track_id)
-            .unwrap()
-            .clips[0]
-            .timeline_start;
+        let new_start =
+            state.read().project.timeline.track(track_id).unwrap().clips[0].timeline_start;
         assert_eq!(new_start.0, 5.0);
         undo.undo(&state);
-        let restored = state
-            .read()
-            .project
-            .timeline
-            .track(track_id)
-            .unwrap()
-            .clips[0]
-            .timeline_start;
+        let restored =
+            state.read().project.timeline.track(track_id).unwrap().clips[0].timeline_start;
         assert_eq!(restored.0, old_start.0);
     }
 }

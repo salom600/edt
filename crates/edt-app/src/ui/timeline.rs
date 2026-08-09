@@ -17,9 +17,7 @@
 
 use crate::app::EdtApp;
 use crate::state::Selection;
-use crate::ui::{
-    panel_header, PLAYHEAD, SELECTION, TEXT_DIM, TRACK_AUDIO, TRACK_VIDEO, WIDGET_BG,
-};
+use crate::ui::{panel_header, PLAYHEAD, SELECTION, TEXT_DIM, TRACK_AUDIO, TRACK_VIDEO, WIDGET_BG};
 use eframe::egui;
 use egui::{Color32, Context, PointerButton, Rect, Response, Sense, Ui, Vec2};
 use std::collections::HashSet;
@@ -128,7 +126,9 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
     let available = ui.available_size();
     let canvas_w = available.x - HEADER_W;
     let canvas_w = canvas_w.max(200.0);
-    let canvas_h = available.y.min(snapshot.tracks.len() as f32 * TRACK_H + RULER_H + 8.0);
+    let canvas_h = available
+        .y
+        .min(snapshot.tracks.len() as f32 * TRACK_H + RULER_H + 8.0);
     let canvas_w_total = canvas_w + HEADER_W;
 
     let (canvas_rect, canvas_resp) =
@@ -184,7 +184,10 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
             track_color,
         );
         painter.text(
-            egui::pos2(header_track_rect.min.x + 10.0, header_track_rect.min.y + 6.0),
+            egui::pos2(
+                header_track_rect.min.x + 10.0,
+                header_track_rect.min.y + 6.0,
+            ),
             egui::Align2::LEFT_TOP,
             &track.name,
             egui::FontId::proportional(12.0),
@@ -192,7 +195,10 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         );
         if track.muted {
             painter.text(
-                egui::pos2(header_track_rect.min.x + 10.0, header_track_rect.min.y + 22.0),
+                egui::pos2(
+                    header_track_rect.min.x + 10.0,
+                    header_track_rect.min.y + 22.0,
+                ),
                 egui::Align2::LEFT_TOP,
                 "(muted)",
                 egui::FontId::proportional(10.0),
@@ -201,7 +207,10 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         }
         if track.locked {
             painter.text(
-                egui::pos2(header_track_rect.min.x + 10.0, header_track_rect.min.y + 36.0),
+                egui::pos2(
+                    header_track_rect.min.x + 10.0,
+                    header_track_rect.min.y + 36.0,
+                ),
                 egui::Align2::LEFT_TOP,
                 "(locked)",
                 egui::FontId::proportional(10.0),
@@ -247,13 +256,22 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                 painter.rect_stroke(clip_rect, 2.0, egui::Stroke::new(2.0, SELECTION));
             }
             // Trim handles (4px on each edge).
-            let left_handle = Rect::from_min_size(clip_rect.min, egui::vec2(4.0, clip_rect.height()));
+            let left_handle =
+                Rect::from_min_size(clip_rect.min, egui::vec2(4.0, clip_rect.height()));
             let right_handle = Rect::from_min_size(
                 egui::pos2(clip_rect.max.x - 4.0, clip_rect.min.y),
                 egui::vec2(4.0, clip_rect.height()),
             );
-            painter.rect_filled(left_handle, 0.0, Color32::from_rgb(255, 255, 255).linear_multiply(0.5));
-            painter.rect_filled(right_handle, 0.0, Color32::from_rgb(255, 255, 255).linear_multiply(0.5));
+            painter.rect_filled(
+                left_handle,
+                0.0,
+                Color32::from_rgb(255, 255, 255).linear_multiply(0.5),
+            );
+            painter.rect_filled(
+                right_handle,
+                0.0,
+                Color32::from_rgb(255, 255, 255).linear_multiply(0.5),
+            );
 
             clip_rects.push((clip.id, clip_rect, is_video));
         }
@@ -269,10 +287,14 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
     }
 
     // Playhead.
-    let playhead_x = body_rect.min.x + ((snapshot.playhead - snapshot.scroll) * snapshot.zoom) as f32;
+    let playhead_x =
+        body_rect.min.x + ((snapshot.playhead - snapshot.scroll) * snapshot.zoom) as f32;
     if playhead_x >= body_rect.min.x && playhead_x <= body_rect.max.x {
         painter.line_segment(
-            [egui::pos2(playhead_x, ruler_rect.min.y), egui::pos2(playhead_x, body_rect.max.y)],
+            [
+                egui::pos2(playhead_x, ruler_rect.min.y),
+                egui::pos2(playhead_x, body_rect.max.y),
+            ],
             egui::Stroke::new(2.0, PLAYHEAD),
         );
         // Triangle at top.
@@ -293,7 +315,8 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
     let pointer = ctx.input(|i| i.pointer.latest_pos());
     let clicked = canvas_resp.drag_started_by(PointerButton::Primary)
         || canvas_resp.drag_started_by(PointerButton::Secondary);
-    let dragging = canvas_resp.is_pointer_button_down_on() && ctx.input(|i| i.pointer.is_decidedly_dragging());
+    let dragging =
+        canvas_resp.is_pointer_button_down_on() && ctx.input(|i| i.pointer.is_decidedly_dragging());
 
     if let Some(p) = pointer {
         if body_rect.contains(p) {
@@ -320,7 +343,9 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
 
             // Cursor hint.
             let cursor = match found_clip.map(|(_, k)| k) {
-                Some(DragKind::TrimLeft) | Some(DragKind::TrimRight) => egui::CursorIcon::ResizeHorizontal,
+                Some(DragKind::TrimLeft) | Some(DragKind::TrimRight) => {
+                    egui::CursorIcon::ResizeHorizontal
+                }
                 Some(DragKind::MoveClip) => egui::CursorIcon::Move,
                 _ => egui::CursorIcon::default(),
             };
@@ -390,7 +415,8 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                             if let Some(track_id) = track_id {
                                 let mut s = app.state.write();
                                 if let Some(track) = s.project.timeline.track_mut(track_id) {
-                                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == id) {
+                                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == id)
+                                    {
                                         let dur = clip.timeline_duration();
                                         clip.timeline_start = edt_core::time::Time(snapped_t);
                                         clip.timeline_end = edt_core::time::Time(snapped_t + dur.0);
@@ -405,7 +431,8 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                             let mut s = app.state.write();
                             if let Some(track_id) = s.project.timeline.track_of_clip(id) {
                                 if let Some(track) = s.project.timeline.track_mut(track_id) {
-                                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == id) {
+                                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == id)
+                                    {
                                         if snapped_t < clip.timeline_end.0 - 0.1 {
                                             clip.trim_left(edt_core::time::Time(snapped_t));
                                             s.mark_dirty();
@@ -420,7 +447,8 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                             let mut s = app.state.write();
                             if let Some(track_id) = s.project.timeline.track_of_clip(id) {
                                 if let Some(track) = s.project.timeline.track_mut(track_id) {
-                                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == id) {
+                                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == id)
+                                    {
                                         if snapped_t > clip.timeline_start.0 + 0.1 {
                                             clip.trim_right(edt_core::time::Time(snapped_t));
                                             s.mark_dirty();
@@ -457,9 +485,12 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                 if track_rect.contains(p) && !track.locked {
                     let t = snapshot.scroll + ((p.x - body_rect.min.x) / snapshot.zoom) as f64;
                     let next_id = app.state.next_id();
-                    app.state
-                        .write()
-                        .add_clip_from_asset(asset_id, track.id, edt_core::time::Time(t.max(0.0)), next_id);
+                    app.state.write().add_clip_from_asset(
+                        asset_id,
+                        track.id,
+                        edt_core::time::Time(t.max(0.0)),
+                        next_id,
+                    );
                     break;
                 }
             }
@@ -509,7 +540,9 @@ fn draw_ruler(painter: &egui::Painter, rect: Rect, zoom: f64, scroll: f64) {
 
 fn nice_interval(target: f64) -> f64 {
     // Round to 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, ...
-    const STEPS: &[f64] = &[1.0, 2.0, 5.0, 10.0, 15.0, 30.0, 60.0, 120.0, 300.0, 600.0, 1800.0, 3600.0];
+    const STEPS: &[f64] = &[
+        1.0, 2.0, 5.0, 10.0, 15.0, 30.0, 60.0, 120.0, 300.0, 600.0, 1800.0, 3600.0,
+    ];
     for &s in STEPS {
         if s >= target {
             return s;

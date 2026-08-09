@@ -36,6 +36,12 @@ pub struct Transition {
 
 impl Transition {
     pub fn new(id: Id, kind: TransitionKind, from_clip: Id, to_clip: Id, duration: Time) -> Self {
-        Self { id, kind, from_clip, to_clip, duration }
+        Self {
+            id,
+            kind,
+            from_clip,
+            to_clip,
+            duration,
+        }
     }
 }

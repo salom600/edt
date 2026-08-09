@@ -26,11 +26,11 @@
 //! `docs/adr/0002-media-backend.md` for the full rationale.
 
 pub mod ffmpeg;
-pub mod probe;
 pub mod frame;
+pub mod probe;
 pub mod thumb;
 
-pub use ffmpeg::{FfmpegPaths, find_ffmpeg, FfmpegError};
-pub use probe::{probe, ProbeResult};
+pub use ffmpeg::{find_ffmpeg, FfmpegError, FfmpegPaths};
 pub use frame::extract_frame;
+pub use probe::{probe, ProbeResult};
 pub use thumb::generate_thumbnail;

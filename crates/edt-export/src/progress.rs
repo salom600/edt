@@ -1,7 +1,7 @@
 //! Progress reporting for export.
 
-use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 
 /// Progress information reported by the export pipeline.
 #[derive(Debug, Clone, Copy)]

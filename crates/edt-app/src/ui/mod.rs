@@ -1,12 +1,12 @@
 //! UI panels for the edt editor shell.
 
-pub mod menubar;
-pub mod media_pool;
-pub mod timeline;
-pub mod preview;
-pub mod inspector;
 pub mod export_dialog;
+pub mod inspector;
+pub mod media_pool;
+pub mod menubar;
+pub mod preview;
 pub mod styles;
+pub mod timeline;
 
 use crate::app::EdtApp;
 use egui::{Color32, Context, Ui};

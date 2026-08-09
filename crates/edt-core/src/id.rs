@@ -47,7 +47,12 @@ impl<'de> Deserialize<'de> for Id {
                 b'n' | b'p' => (b - b'a' + 8) as u128,
                 b'q'..=b't' => (b - b'a' + 7) as u128,
                 b'v'..=b'z' => (b - b'a' + 6) as u128,
-                _ => return Err(serde::de::Error::custom(format!("invalid id char: {}", b as char))),
+                _ => {
+                    return Err(serde::de::Error::custom(format!(
+                        "invalid id char: {}",
+                        b as char
+                    )))
+                }
             };
             value = (value << 5) | digit;
         }

@@ -15,22 +15,22 @@
 //! stores a `fps: f64` field so frames can be derived when needed:
 //! `frame_idx = round(t * fps)`.
 
+pub mod effect;
+pub mod export;
 pub mod id;
 pub mod media;
 pub mod project;
-pub mod timeline;
-pub mod effect;
-pub mod transition;
-pub mod export;
 pub mod time;
+pub mod timeline;
+pub mod transition;
 
+pub use effect::{ColorGrade, Effect, EffectKind};
+pub use export::{ExportAudioCodec, ExportFormat, ExportSettings, ExportVideoCodec};
 pub use id::{Id, IdGenerator};
-pub use media::{MediaAsset, MediaKind, MediaMetadata, VideoInfo, AudioInfo};
+pub use media::{AudioInfo, MediaAsset, MediaKind, MediaMetadata, VideoInfo};
 pub use project::{Project, ProjectSettings};
-pub use timeline::{Timeline, Track, TrackKind, Clip, ClipSource, ClipBounds};
-pub use effect::{Effect, EffectKind, ColorGrade};
+pub use timeline::{Clip, ClipBounds, ClipSource, Timeline, Track, TrackKind};
 pub use transition::{Transition, TransitionKind};
-pub use export::{ExportSettings, ExportFormat, ExportVideoCodec, ExportAudioCodec};
 
 pub use time::{Time, TimeRange};
 

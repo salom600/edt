@@ -16,8 +16,8 @@
 //! LUTs) are documented in `docs/adr/0006-render-pipeline.md` and
 //! tracked on the v0.2 roadmap.
 
-pub mod compose;
 pub mod audio;
+pub mod compose;
 
-pub use compose::{compose_frame, CompositeFrame, ActiveClip};
 pub use audio::{mix_audio, AudioMixOutput};
+pub use compose::{compose_frame, ActiveClip, CompositeFrame};

@@ -127,7 +127,12 @@ impl MediaAsset {
     }
 
     pub fn duration(&self) -> Time {
-        Time::from_secs(self.metadata.as_ref().and_then(|m| m.duration).unwrap_or(0.0))
+        Time::from_secs(
+            self.metadata
+                .as_ref()
+                .and_then(|m| m.duration)
+                .unwrap_or(0.0),
+        )
     }
 
     pub fn video_info(&self) -> Option<&VideoInfo> {

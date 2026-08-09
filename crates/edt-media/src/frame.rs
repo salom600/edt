@@ -20,10 +20,14 @@ pub fn extract_frame(
     let mut args: Vec<&str> = Vec::with_capacity(10);
     args.extend_from_slice(&[
         "-y",
-        "-loglevel", "error",
-        "-ss", &time_str,
-        "-i", path.to_str().expect("path is utf-8"),
-        "-frames:v", "1",
+        "-loglevel",
+        "error",
+        "-ss",
+        &time_str,
+        "-i",
+        path.to_str().expect("path is utf-8"),
+        "-frames:v",
+        "1",
     ]);
 
     let scale_filter = match max_width {

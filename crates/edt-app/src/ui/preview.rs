@@ -45,10 +45,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         // Find the topmost active video clip and resolve its source file.
         let mut top: Option<(std::path::PathBuf, f64)> = None;
         for (track, clip) in s.project.timeline.active_clips_at(s.playhead) {
-            if track.kind != edt_core::timeline::TrackKind::Video
-                || track.muted
-                || clip.muted
-            {
+            if track.kind != edt_core::timeline::TrackKind::Video || track.muted || clip.muted {
                 continue;
             }
             if let Some(asset) = s.project.asset(clip.source.asset_id) {
@@ -118,11 +115,14 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         };
         if should_request {
             if let Some((path, src_t)) = top_clip_path {
-                let _ = app.jobs.tx.send(crate::background::JobRequest::PreviewFrame {
-                    path,
-                    time: edt_core::time::Time(src_t),
-                    max_width: 640,
-                });
+                let _ = app
+                    .jobs
+                    .tx
+                    .send(crate::background::JobRequest::PreviewFrame {
+                        path,
+                        time: edt_core::time::Time(src_t),
+                        max_width: 640,
+                    });
                 app.preview_cache.last_request = Some(frame_t);
                 app.preview_cache.last_request_at = Some(now);
             }
@@ -144,11 +144,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         ui.allocate_exact_size(egui::vec2(canvas_w, transport_h), Sense::click());
     let transport = ui.painter().with_clip_rect(transport_rect);
 
-    ui.painter().rect_filled(
-        transport_rect,
-        4.0,
-        WIDGET_BG,
-    );
+    ui.painter().rect_filled(transport_rect, 4.0, WIDGET_BG);
 
     ui.allocate_ui_at_rect(transport_rect.shrink2(egui::vec2(8.0, 4.0)), |ui| {
         ui.horizontal_centered(|ui| {
@@ -162,7 +158,11 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
             }
             // Play/pause.
             let play_label = if is_playing { "⏸" } else { "▶" };
-            if ui.button(play_label).on_hover_text("Play/Pause (Space)").clicked() {
+            if ui
+                .button(play_label)
+                .on_hover_text("Play/Pause (Space)")
+                .clicked()
+            {
                 app.state.write().toggle_play();
             }
             // Frame forward.

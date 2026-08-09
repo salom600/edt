@@ -1,7 +1,7 @@
 //! Thumbnail generation for the media pool.
 
-use crate::frame::extract_frame;
 use crate::ffmpeg::FfmpegError;
+use crate::frame::extract_frame;
 use edt_core::media::MediaAsset;
 use image::RgbaImage;
 use std::path::Path;
@@ -33,7 +33,8 @@ pub fn generate_thumbnail(asset: &MediaAsset) -> Result<Option<RgbaImage>, Ffmpe
             let aspect = rgba.height() as f32 / rgba.width() as f32;
             let h = (THUMB_W as f32 * aspect).round() as u32;
             let h = h.max(1);
-            let thumb = image::imageops::resize(&rgba, THUMB_W, h, image::imageops::FilterType::Triangle);
+            let thumb =
+                image::imageops::resize(&rgba, THUMB_W, h, image::imageops::FilterType::Triangle);
             Ok(Some(thumb))
         }
         edt_core::media::MediaKind::Audio => Ok(None),

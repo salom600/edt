@@ -2,10 +2,10 @@
 
 use crate::app::EdtApp;
 use crate::ui::{ACCENT, TEXT, TEXT_DIM, WIDGET_BG};
-use eframe::egui;
-use egui::{Color32, Context, Ui};
 use edt_core::export::{ExportAudioCodec, ExportFormat, ExportSettings, ExportVideoCodec};
 use edt_export::{ExportOptions, ExportStrategy, ProgressUpdate};
+use eframe::egui;
+use egui::{Color32, Context, Ui};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -101,10 +101,26 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
             egui::ComboBox::from_id_source("vcodec")
                 .selected_text(format!("{:?}", s.video_codec))
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut s.video_codec, ExportVideoCodec::H264, "H.264 (libx264)");
-                    ui.selectable_value(&mut s.video_codec, ExportVideoCodec::H265, "H.265 (libx265)");
-                    ui.selectable_value(&mut s.video_codec, ExportVideoCodec::Av1, "AV1 (libsvtav1)");
-                    ui.selectable_value(&mut s.video_codec, ExportVideoCodec::Vp9, "VP9 (libvpx-vp9)");
+                    ui.selectable_value(
+                        &mut s.video_codec,
+                        ExportVideoCodec::H264,
+                        "H.264 (libx264)",
+                    );
+                    ui.selectable_value(
+                        &mut s.video_codec,
+                        ExportVideoCodec::H265,
+                        "H.265 (libx265)",
+                    );
+                    ui.selectable_value(
+                        &mut s.video_codec,
+                        ExportVideoCodec::Av1,
+                        "AV1 (libsvtav1)",
+                    );
+                    ui.selectable_value(
+                        &mut s.video_codec,
+                        ExportVideoCodec::Vp9,
+                        "VP9 (libvpx-vp9)",
+                    );
                     ui.selectable_value(&mut s.video_codec, ExportVideoCodec::Prores, "ProRes");
                 });
             ui.end_row();
@@ -119,7 +135,11 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
             ui.end_row();
 
             ui.label("Framerate");
-            ui.add(egui::Slider::new(&mut s.fps, 1.0..=120.0).step_by(1.0).text("fps"));
+            ui.add(
+                egui::Slider::new(&mut s.fps, 1.0..=120.0)
+                    .step_by(1.0)
+                    .text("fps"),
+            );
             ui.end_row();
 
             ui.label("CRF (quality)");
@@ -139,7 +159,11 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
                 .show_ui(ui, |ui| {
                     ui.selectable_value(&mut s.audio_codec, ExportAudioCodec::Aac, "AAC");
                     ui.selectable_value(&mut s.audio_codec, ExportAudioCodec::Opus, "Opus");
-                    ui.selectable_value(&mut s.audio_codec, ExportAudioCodec::PcmS16le, "PCM S16 LE");
+                    ui.selectable_value(
+                        &mut s.audio_codec,
+                        ExportAudioCodec::PcmS16le,
+                        "PCM S16 LE",
+                    );
                 });
             ui.end_row();
 
@@ -192,7 +216,10 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
             app.export_dialog.show = false;
         }
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            if ui.add(egui::Button::new("Start Export").fill(ACCENT)).clicked() {
+            if ui
+                .add(egui::Button::new("Start Export").fill(ACCENT))
+                .clicked()
+            {
                 start_export(app);
             }
         });
@@ -206,7 +233,10 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
                 ui.colored_label(Color32::from_rgb(132, 204, 22), "✓ Export succeeded");
             }
             Err(e) => {
-                ui.colored_label(Color32::from_rgb(248, 113, 113), format!("✗ Export failed: {e}"));
+                ui.colored_label(
+                    Color32::from_rgb(248, 113, 113),
+                    format!("✗ Export failed: {e}"),
+                );
             }
         }
     }

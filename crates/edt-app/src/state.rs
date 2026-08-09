@@ -55,7 +55,7 @@ pub struct EditorStateInner {
     pub selection: Selection,
     pub playhead: Time,
     pub play_state: PlayState,
-    pub timeline_zoom: f64, // pixels per second
+    pub timeline_zoom: f64,   // pixels per second
     pub timeline_scroll: f64, // seconds at left edge
     pub dirty: bool,
     pub last_autosave: Option<std::time::Instant>,

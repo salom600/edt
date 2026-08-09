@@ -50,11 +50,17 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
         });
 
         ui.menu_button("Edit", |ui| {
-            if ui.add_enabled(app.undo.can_undo(), egui::Button::new("Undo")).clicked() {
+            if ui
+                .add_enabled(app.undo.can_undo(), egui::Button::new("Undo"))
+                .clicked()
+            {
                 app.undo.undo(&app.state);
                 ui.close_menu();
             }
-            if ui.add_enabled(app.undo.can_redo(), egui::Button::new("Redo")).clicked() {
+            if ui
+                .add_enabled(app.undo.can_redo(), egui::Button::new("Redo"))
+                .clicked()
+            {
                 app.undo.redo(&app.state);
                 ui.close_menu();
             }
@@ -122,7 +128,10 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                 ui.close_menu();
             }
             ui.separator();
-            ui.hyperlink_to("Documentation", "https://github.com/salom600/edt/blob/main/docs/architecture.md");
+            ui.hyperlink_to(
+                "Documentation",
+                "https://github.com/salom600/edt/blob/main/docs/architecture.md",
+            );
             ui.hyperlink_to("Report a Bug", "https://github.com/salom600/edt/issues");
         });
 

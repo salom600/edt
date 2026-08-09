@@ -47,7 +47,10 @@ pub fn save_project(project: &Project, path: &Path) -> Result<(), StorageError> 
     let json = format!("{json}\n");
 
     let mut tmp_path = path.to_path_buf();
-    let stem = tmp_path.file_name().map(|s| s.to_owned()).unwrap_or_default();
+    let stem = tmp_path
+        .file_name()
+        .map(|s| s.to_owned())
+        .unwrap_or_default();
     let mut tmp_name = std::ffi::OsString::from(".");
     tmp_name.push(stem);
     tmp_name.push(".tmp");
@@ -64,8 +67,12 @@ pub fn save_project(project: &Project, path: &Path) -> Result<(), StorageError> 
 /// Load a project from `path`. Returns an error if the file does not
 /// exist, is not valid JSON, or has an unsupported format version.
 pub fn load_project(path: &Path) -> Result<Project, StorageError> {
-    let raw = std::fs::read_to_string(path)
-        .map_err(|e| StorageError::Io(std::io::Error::new(e.kind(), format!("reading project file {}: {}", path.display(), e))))?;
+    let raw = std::fs::read_to_string(path).map_err(|e| {
+        StorageError::Io(std::io::Error::new(
+            e.kind(),
+            format!("reading project file {}: {}", path.display(), e),
+        ))
+    })?;
     let wrapper: ProjectFile = serde_json::from_str(&raw)?;
     if wrapper.format_version > PROJECT_FORMAT_VERSION {
         return Err(StorageError::UnsupportedVersion {

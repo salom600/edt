@@ -121,9 +121,7 @@ fn export_via_concat(
         .find(|t| !t.clips.is_empty())
         .ok_or(ExportError::EmptyTimeline)?;
     let asset_id = track.clips[0].source.asset_id;
-    let asset = project
-        .asset(asset_id)
-        .ok_or(ExportError::EmptyTimeline)?;
+    let asset = project.asset(asset_id).ok_or(ExportError::EmptyTimeline)?;
 
     let paths = find_ffmpeg()?;
     let mut cmd = Command::new(&paths.ffmpeg);
@@ -134,8 +132,10 @@ fn export_via_concat(
     // accurate seek). For MVP simplicity, we use -ss before -i which is
     // accurate enough for most sources.
     for c in &track.clips {
-        cmd.arg("-ss").arg(format!("{:.3}", c.source.source_start.as_secs()));
-        cmd.arg("-t").arg(format!("{:.3}", c.source.duration().as_secs()));
+        cmd.arg("-ss")
+            .arg(format!("{:.3}", c.source.source_start.as_secs()));
+        cmd.arg("-t")
+            .arg(format!("{:.3}", c.source.duration().as_secs()));
         cmd.arg("-i").arg(asset.editing_path());
     }
 
@@ -145,7 +145,11 @@ fn export_via_concat(
     if n > 1 {
         filter.push_str(&format!(
             "concat=n={n}:v=1{}",
-            if track.kind == TrackKind::Audio { ":a=1" } else { ":a=0" }
+            if track.kind == TrackKind::Audio {
+                ":a=1"
+            } else {
+                ":a=0"
+            }
         ));
         filter.push(' ');
     } else if track.kind == TrackKind::Audio {
@@ -198,12 +202,18 @@ fn export_via_frame_pipe(
     let paths = find_ffmpeg()?;
     let mut cmd = Command::new(&paths.ffmpeg);
     cmd.arg("-y")
-        .arg("-loglevel").arg("error")
-        .arg("-f").arg("rawvideo")
-        .arg("-pix_fmt").arg("rgba")
-        .arg("-s").arg(format!("{}x{}", s.width, s.height))
-        .arg("-r").arg(format!("{}", s.fps))
-        .arg("-i").arg("-")
+        .arg("-loglevel")
+        .arg("error")
+        .arg("-f")
+        .arg("rawvideo")
+        .arg("-pix_fmt")
+        .arg("rgba")
+        .arg("-s")
+        .arg(format!("{}x{}", s.width, s.height))
+        .arg("-r")
+        .arg(format!("{}", s.fps))
+        .arg("-i")
+        .arg("-")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
@@ -212,9 +222,13 @@ fn export_via_frame_pipe(
     cmd.arg(options.output_path.to_str().expect("path is utf-8"));
 
     let mut child = cmd.spawn()?;
-    let mut stdin = child.stdin.take().ok_or(ExportError::Io(
-        std::io::Error::new(std::io::ErrorKind::BrokenPipe, "no stdin"),
-    ))?;
+    let mut stdin = child
+        .stdin
+        .take()
+        .ok_or(ExportError::Io(std::io::Error::new(
+            std::io::ErrorKind::BrokenPipe,
+            "no stdin",
+        )))?;
 
     let mut frame_idx: u64 = 0;
     let mut current_time = 0.0f64;

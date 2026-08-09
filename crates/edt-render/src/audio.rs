@@ -39,7 +39,12 @@ impl AudioMixOutput {
 /// gains applied. No limiter is on the master bus, so heavy clipping is
 /// possible — the export pipeline applies a soft clip in the ffmpeg
 /// filter chain.
-pub fn mix_audio<F>(project: &Project, t: Time, frames: usize, mut clip_samples: F) -> AudioMixOutput
+pub fn mix_audio<F>(
+    project: &Project,
+    t: Time,
+    frames: usize,
+    mut clip_samples: F,
+) -> AudioMixOutput
 where
     F: FnMut(&Clip) -> Option<(Vec<f32>, Vec<f32>)>,
 {
@@ -88,8 +93,8 @@ mod tests {
     use super::*;
     use edt_core::id::IdGenerator;
     use edt_core::project::Project;
-    use edt_core::timeline::{Clip, ClipSource};
     use edt_core::time::Time;
+    use edt_core::timeline::{Clip, ClipSource};
 
     #[test]
     fn silence_returns_zero_buffer() {

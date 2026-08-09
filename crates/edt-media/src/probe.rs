@@ -1,6 +1,6 @@
 //! Media probing — calls `ffprobe` to extract metadata about a file.
 
-use crate::ffmpeg::{ensure_exists, parse_fraction, run_ffprobe, FfprobeOutput, FfmpegError};
+use crate::ffmpeg::{ensure_exists, parse_fraction, run_ffprobe, FfmpegError, FfprobeOutput};
 use edt_core::media::{AudioInfo, MediaMetadata, VideoInfo};
 use std::path::Path;
 
@@ -18,8 +18,10 @@ pub struct ProbeResult {
 pub fn probe(path: &Path) -> Result<ProbeResult, FfmpegError> {
     ensure_exists(path)?;
     let stdout = run_ffprobe(&[
-        "-v", "error",
-        "-print_format", "json",
+        "-v",
+        "error",
+        "-print_format",
+        "json",
         "-show_format",
         "-show_streams",
         path.to_str().expect("path is utf-8"),

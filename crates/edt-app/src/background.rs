@@ -37,9 +37,7 @@ pub enum JobResult {
         result: Result<RgbaImage, String>,
     },
     /// An export finished.
-    Export {
-        result: Result<(), String>,
-    },
+    Export { result: Result<(), String> },
     /// Export progress tick.
     ExportProgress { done: u64, total: u64 },
 }
@@ -67,9 +65,18 @@ impl BackgroundJobs {
 /// Requests dispatched to the worker.
 #[derive(Debug)]
 pub enum JobRequest {
-    Probe { path: PathBuf, name: String },
-    Thumbnail { asset: MediaAsset },
-    PreviewFrame { path: PathBuf, time: Time, max_width: u32 },
+    Probe {
+        path: PathBuf,
+        name: String,
+    },
+    Thumbnail {
+        asset: MediaAsset,
+    },
+    PreviewFrame {
+        path: PathBuf,
+        time: Time,
+        max_width: u32,
+    },
     Export {
         project: Project,
         options: ExportOptions,
@@ -84,24 +91,36 @@ fn worker_loop(rx: Receiver<JobRequest>, tx: Sender<JobResult>, state: Arc<Edito
         match req {
             JobRequest::Shutdown => break,
             JobRequest::Probe { path, name } => {
-                let result = edt_media::probe(&path).map(|r| r.metadata).map_err(|e| e.to_string());
+                let result = edt_media::probe(&path)
+                    .map(|r| r.metadata)
+                    .map_err(|e| e.to_string());
                 let _ = tx.send(JobResult::Probe { path, name, result });
             }
             JobRequest::Thumbnail { asset } => {
-                let result =
-                    edt_media::generate_thumbnail(&asset).map_err(|e| e.to_string());
-                let _ = tx.send(JobResult::Thumbnail { asset_id: asset.id, result: result.ok().flatten().ok_or_else(|| "no thumbnail".into()) });
+                let result = edt_media::generate_thumbnail(&asset).map_err(|e| e.to_string());
+                let _ = tx.send(JobResult::Thumbnail {
+                    asset_id: asset.id,
+                    result: result.ok().flatten().ok_or_else(|| "no thumbnail".into()),
+                });
             }
-            JobRequest::PreviewFrame { path, time, max_width } => {
-                let result =
-                    edt_media::extract_frame(&path, time.0, Some(max_width))
-                        .map_err(|e| e.to_string());
+            JobRequest::PreviewFrame {
+                path,
+                time,
+                max_width,
+            } => {
+                let result = edt_media::extract_frame(&path, time.0, Some(max_width))
+                    .map_err(|e| e.to_string());
                 let _ = tx.send(JobResult::PreviewFrame { time, result });
             }
-            JobRequest::Export { project, options, strategy_hint: _, progress } => {
+            JobRequest::Export {
+                project,
+                options,
+                strategy_hint: _,
+                progress,
+            } => {
                 let p = progress.clone();
-                let result = edt_export::export_project(&project, &options, p)
-                    .map_err(|e| e.to_string());
+                let result =
+                    edt_export::export_project(&project, &options, p).map_err(|e| e.to_string());
                 let _ = tx.send(JobResult::Export { result });
                 // Suppress unused state warning when not needed.
                 let _ = &state;

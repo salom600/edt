@@ -35,12 +35,12 @@ pub fn render(app: &mut EdtApp, _ctx: &Context, ui: &mut Ui) {
             .iter()
             .map(|a| {
                 let meta_summary = match a.kind() {
-                    edt_core::media::MediaKind::Video => {
-                        a.video_info().map(|v| format!("{}×{} · {:.2}fps", v.width, v.height, v.fps))
-                    }
-                    edt_core::media::MediaKind::Audio => {
-                        a.audio_info().map(|a| format!("{}Hz · {}ch", a.sample_rate, a.channels))
-                    }
+                    edt_core::media::MediaKind::Video => a
+                        .video_info()
+                        .map(|v| format!("{}×{} · {:.2}fps", v.width, v.height, v.fps)),
+                    edt_core::media::MediaKind::Audio => a
+                        .audio_info()
+                        .map(|a| format!("{}Hz · {}ch", a.sample_rate, a.channels)),
                     edt_core::media::MediaKind::Image => Some("Image".into()),
                     edt_core::media::MediaKind::Unknown => Some("Unknown".into()),
                 };
@@ -54,7 +54,11 @@ pub fn render(app: &mut EdtApp, _ctx: &Context, ui: &mut Ui) {
             ui.add_space(80.0);
             ui.label(egui::RichText::new("No media imported").color(TEXT_DIM));
             ui.add_space(8.0);
-            ui.label(egui::RichText::new("Click \"Import\" above").color(TEXT_DIM).small());
+            ui.label(
+                egui::RichText::new("Click \"Import\" above")
+                    .color(TEXT_DIM)
+                    .small(),
+            );
         });
     }
 
@@ -68,10 +72,7 @@ pub fn render(app: &mut EdtApp, _ctx: &Context, ui: &mut Ui) {
                 let label_color = label_color(*label);
                 let row_resp = ui.horizontal(|ui| {
                     // Label color stripe.
-                    let (rect, _) = ui.allocate_exact_size(
-                        egui::vec2(4.0, 56.0),
-                        Sense::hover(),
-                    );
+                    let (rect, _) = ui.allocate_exact_size(egui::vec2(4.0, 56.0), Sense::hover());
                     ui.painter().rect_filled(rect, 0.0, label_color);
 
                     // Thumbnail (or placeholder).
@@ -158,10 +159,7 @@ pub fn render(app: &mut EdtApp, _ctx: &Context, ui: &mut Ui) {
 }
 
 /// Helper to convert an `RgbaImage` into an `egui::TextureHandle`.
-pub fn upload_texture(
-    ctx: &Context,
-    image: &image::RgbaImage,
-) -> egui::TextureHandle {
+pub fn upload_texture(ctx: &Context, image: &image::RgbaImage) -> egui::TextureHandle {
     let color_image = egui::ColorImage {
         size: [image.width() as usize, image.height() as usize],
         pixels: image

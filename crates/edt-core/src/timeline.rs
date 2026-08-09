@@ -58,9 +58,7 @@ impl Track {
 
     /// Returns the clip whose timeline range contains `t`, if any.
     pub fn clip_at(&self, t: Time) -> Option<&Clip> {
-        self.clips
-            .iter()
-            .find(|c| c.timeline_range().contains(t))
+        self.clips.iter().find(|c| c.timeline_range().contains(t))
     }
 
     /// Returns the clip whose timeline range contains `t`, mutably.
@@ -292,10 +290,8 @@ impl Timeline {
     /// how the UI renders them. Video tracks render top-down so that the
     /// topmost track in the list visually appears on top of the canvas.
     pub fn tracks_top_to_bottom(&self) -> impl Iterator<Item = &Track> {
-        let (video, audio): (Vec<_>, Vec<_>) = self
-            .tracks
-            .iter()
-            .partition(|t| t.kind == TrackKind::Video);
+        let (video, audio): (Vec<_>, Vec<_>) =
+            self.tracks.iter().partition(|t| t.kind == TrackKind::Video);
         video.into_iter().chain(audio)
     }
 

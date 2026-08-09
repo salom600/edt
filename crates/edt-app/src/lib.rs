@@ -11,9 +11,9 @@
 //! flow back via channels polled on each frame.
 
 mod app;
-mod state;
-mod commands;
 mod background;
+mod commands;
+mod state;
 mod ui;
 
 pub use app::EdtApp;

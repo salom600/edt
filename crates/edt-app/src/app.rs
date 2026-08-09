@@ -3,18 +3,20 @@
 use crate::background::{BackgroundJobs, JobResult};
 use crate::commands::{AddClipCmd, DeleteClipCmd, SplitClipCmd, UndoStack};
 use crate::state::{EditorState, EditorStateInner, Selection};
-use crate::ui::{menubar, media_pool, timeline, preview, inspector, export_dialog, apply_theme, ThumbCache};
-use crate::ui::preview::PreviewCache;
-use crate::ui::menubar::MenuState;
 use crate::ui::export_dialog::ExportDialogState;
+use crate::ui::menubar::MenuState;
+use crate::ui::preview::PreviewCache;
 use crate::ui::timeline::DragState;
-use eframe::egui;
-use egui::{Context, Ui};
+use crate::ui::{
+    apply_theme, export_dialog, inspector, media_pool, menubar, preview, timeline, ThumbCache,
+};
 use edt_core::id::Id;
 use edt_core::media::{MediaAsset, MediaMetadata};
 use edt_core::project::{Project, ProjectFile};
 use edt_core::time::Time;
 use edt_core::timeline::{Clip, ClipSource};
+use eframe::egui;
+use egui::{Context, Ui};
 use parking_lot::Mutex;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -161,7 +163,10 @@ impl EdtApp {
             proxy_path: None,
         };
         self.state.write().add_asset(asset.clone());
-        let _ = self.jobs.tx.send(crate::background::JobRequest::Thumbnail { asset });
+        let _ = self
+            .jobs
+            .tx
+            .send(crate::background::JobRequest::Thumbnail { asset });
     }
 
     // -- Edit operations ----------------------------------------------------
@@ -178,7 +183,13 @@ impl EdtApp {
             s.project.timeline.clip(id).map(|(_, c)| c.clone())
         };
         let Some(original) = original else { return };
-        let track_id = match self.state.read().project.timeline.track_of_clip(original.id) {
+        let track_id = match self
+            .state
+            .read()
+            .project
+            .timeline
+            .track_of_clip(original.id)
+        {
             Some(t) => t,
             None => return,
         };
@@ -226,7 +237,10 @@ impl EdtApp {
             None => return,
         };
         self.undo.push(
-            Box::new(DeleteClipCmd { clip: clip.clone(), track_id }),
+            Box::new(DeleteClipCmd {
+                clip: clip.clone(),
+                track_id,
+            }),
             &self.state,
         );
         // The command applies itself.
@@ -339,34 +353,30 @@ impl EdtApp {
                         }
                     }
                 }
-                JobResult::Thumbnail { asset_id, result } => {
-                    match result {
-                        Ok(img) => {
-                            let handle = media_pool::upload_texture(ctx, &img);
-                            self.thumbs.insert(asset_id, handle);
-                        }
-                        Err(e) => {
-                            tracing::warn!(%asset_id, error = %e, "thumbnail failed");
-                        }
+                JobResult::Thumbnail { asset_id, result } => match result {
+                    Ok(img) => {
+                        let handle = media_pool::upload_texture(ctx, &img);
+                        self.thumbs.insert(asset_id, handle);
                     }
-                }
-                JobResult::PreviewFrame { time, result } => {
-                    match result {
-                        Ok(img) => {
-                            let handle = media_pool::upload_texture(ctx, &img);
-                            let fps = self.state.read().project.settings.fps;
-                            let key = (time.0 * fps).round() / fps;
-                            if self.preview_cache.frames.len() >= 32 {
-                                self.preview_cache.frames.clear();
-                            }
-                            self.preview_cache.frames.insert(key, handle);
-                            ctx.request_repaint();
-                        }
-                        Err(e) => {
-                            tracing::debug!(error = %e, "preview frame failed (likely no ffmpeg)");
-                        }
+                    Err(e) => {
+                        tracing::warn!(%asset_id, error = %e, "thumbnail failed");
                     }
-                }
+                },
+                JobResult::PreviewFrame { time, result } => match result {
+                    Ok(img) => {
+                        let handle = media_pool::upload_texture(ctx, &img);
+                        let fps = self.state.read().project.settings.fps;
+                        let key = (time.0 * fps).round() / fps;
+                        if self.preview_cache.frames.len() >= 32 {
+                            self.preview_cache.frames.clear();
+                        }
+                        self.preview_cache.frames.insert(key, handle);
+                        ctx.request_repaint();
+                    }
+                    Err(e) => {
+                        tracing::debug!(error = %e, "preview frame failed (likely no ffmpeg)");
+                    }
+                },
                 JobResult::Export { result } => {
                     self.export_dialog.in_progress = false;
                     self.export_dialog.last_result = Some(result.clone());
@@ -395,10 +405,7 @@ impl EdtApp {
     fn handle_file_dialogs(&mut self) {
         // rfd blocking dialogs run on a worker thread to avoid UI stalls.
         // We spawn one if pending, and consume its result on the next frame.
-        if !self.pending_open_dialog
-            && !self.pending_save_dialog
-            && !self.pending_import_dialog
-        {
+        if !self.pending_open_dialog && !self.pending_save_dialog && !self.pending_import_dialog {
             return;
         }
         let kind = self.file_dialog_kind;
@@ -530,10 +537,21 @@ impl EdtApp {
                     ui.label(egui::RichText::new("v0.1.0").weak());
                     ui.add_space(8.0);
                     ui.hyperlink_to("Source", "https://github.com/salom600/edt");
-                    ui.hyperlink_to("Documentation", "https://github.com/salom600/edt/blob/main/docs/architecture.md");
+                    ui.hyperlink_to(
+                        "Documentation",
+                        "https://github.com/salom600/edt/blob/main/docs/architecture.md",
+                    );
                     ui.add_space(12.0);
-                    ui.label(egui::RichText::new("Built with Rust, egui, and FFmpeg.").weak().small());
-                    ui.label(egui::RichText::new("Licensed under MIT OR Apache-2.0.").weak().small());
+                    ui.label(
+                        egui::RichText::new("Built with Rust, egui, and FFmpeg.")
+                            .weak()
+                            .small(),
+                    );
+                    ui.label(
+                        egui::RichText::new("Licensed under MIT OR Apache-2.0.")
+                            .weak()
+                            .small(),
+                    );
                 });
             });
         self.about_window_open = open;

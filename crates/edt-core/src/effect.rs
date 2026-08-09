@@ -31,9 +31,15 @@ pub struct ColorGrade {
 impl Default for ColorGrade {
     fn default() -> Self {
         Self {
-            lift_r: 0.0, lift_g: 0.0, lift_b: 0.0,
-            gamma_r: 1.0, gamma_g: 1.0, gamma_b: 1.0,
-            gain_r: 1.0, gain_g: 1.0, gain_b: 1.0,
+            lift_r: 0.0,
+            lift_g: 0.0,
+            lift_b: 0.0,
+            gamma_r: 1.0,
+            gamma_g: 1.0,
+            gamma_b: 1.0,
+            gain_r: 1.0,
+            gain_g: 1.0,
+            gain_b: 1.0,
             saturation: 1.0,
             brightness: 0.0,
             contrast: 1.0,
@@ -48,23 +54,45 @@ impl Default for ColorGrade {
 pub enum EffectKind {
     ColorGrade(ColorGrade),
     /// Gaussian blur, radius in pixels.
-    Blur { radius: f32 },
+    Blur {
+        radius: f32,
+    },
     /// Simple horizontal/vertical flip.
-    Flip { horizontal: bool, vertical: bool },
+    Flip {
+        horizontal: bool,
+        vertical: bool,
+    },
     /// Rotation in degrees. Must be a multiple of 90 for the MVP.
-    Rotate { degrees: i32 },
+    Rotate {
+        degrees: i32,
+    },
     /// Crop rectangle as fractions of source size (0.0..=1.0).
-    Crop { x: f32, y: f32, w: f32, h: f32 },
+    Crop {
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+    },
     /// Scale factor relative to source size.
-    Scale { factor: f32 },
+    Scale {
+        factor: f32,
+    },
     /// Opacity multiplier (0.0..=1.0). Composed with the clip's own opacity.
-    Opacity { value: f32 },
+    Opacity {
+        value: f32,
+    },
     /// Audio volume gain in dB. 0.0 = unity.
-    VolumeGain { db: f32 },
+    VolumeGain {
+        db: f32,
+    },
     /// Audio fade in over N seconds at clip start.
-    FadeIn { duration: f32 },
+    FadeIn {
+        duration: f32,
+    },
     /// Audio fade out over N seconds at clip end.
-    FadeOut { duration: f32 },
+    FadeOut {
+        duration: f32,
+    },
     /// Text overlay (MVP: fixed position, no keyframes).
     Text {
         text: String,
@@ -86,7 +114,11 @@ pub struct Effect {
 
 impl Effect {
     pub fn new(id: Id, kind: EffectKind) -> Self {
-        Self { id, enabled: true, kind }
+        Self {
+            id,
+            enabled: true,
+            kind,
+        }
     }
 }
 

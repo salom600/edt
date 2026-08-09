@@ -65,7 +65,10 @@ where
         }
     }
 
-    CompositeFrame { image: canvas, time: t }
+    CompositeFrame {
+        image: canvas,
+        time: t,
+    }
 }
 
 /// Blit `src` onto `dst` such that `src` fits within `dst` while
@@ -150,10 +153,7 @@ mod tests {
         });
         // Some pixel should now be red (blit fit centered, so for a 1920x1080
         // canvas the 2x2 image gets upscaled to fill, all pixels are red).
-        let non_bg = frame
-            .image
-            .pixels()
-            .any(|p| p.0 == [255, 0, 0, 255]);
+        let non_bg = frame.image.pixels().any(|p| p.0 == [255, 0, 0, 255]);
         assert!(non_bg, "expected at least one red pixel after blit");
     }
 

@@ -57,10 +57,23 @@ fn render_clip_props(app: &mut EdtApp, ui: &mut Ui, clip_id: edt_core::id::Id) {
         let mut name = snapshot.name.clone();
         ui.text_edit_singleline(&mut name);
         if name != snapshot.name {
-            app.state.write().project.timeline.track_of_clip(clip_id).and_then(|tid| {
-                app.state.write().project.timeline.track_mut(tid)?.clips.iter_mut().find(|c| c.id == clip_id)?.name = name;
-                Some(())
-            });
+            app.state
+                .write()
+                .project
+                .timeline
+                .track_of_clip(clip_id)
+                .and_then(|tid| {
+                    app.state
+                        .write()
+                        .project
+                        .timeline
+                        .track_mut(tid)?
+                        .clips
+                        .iter_mut()
+                        .find(|c| c.id == clip_id)?
+                        .name = name;
+                    Some(())
+                });
         }
     });
 
@@ -86,15 +99,27 @@ fn render_clip_props(app: &mut EdtApp, ui: &mut Ui, clip_id: edt_core::id::Id) {
 
     ui.separator();
     ui.label(egui::RichText::new("Timing").color(TEXT).size(12.0));
-    ui.label(format!("Timeline: {:.3}s → {:.3}s ({:.3}s)",
-        snapshot.timeline_start, snapshot.timeline_end, snapshot.timeline_end - snapshot.timeline_start));
-    ui.label(format!("Source:   {:.3}s → {:.3}s ({:.3}s)",
-        snapshot.source_start, snapshot.source_end, snapshot.source_end - snapshot.source_start));
+    ui.label(format!(
+        "Timeline: {:.3}s → {:.3}s ({:.3}s)",
+        snapshot.timeline_start,
+        snapshot.timeline_end,
+        snapshot.timeline_end - snapshot.timeline_start
+    ));
+    ui.label(format!(
+        "Source:   {:.3}s → {:.3}s ({:.3}s)",
+        snapshot.source_start,
+        snapshot.source_end,
+        snapshot.source_end - snapshot.source_start
+    ));
 
     let mut speed = snapshot.speed;
     ui.horizontal(|ui| {
         ui.label("Speed");
-        ui.add(egui::Slider::new(&mut speed, 0.25..=4.0).step_by(0.05).text("×"));
+        ui.add(
+            egui::Slider::new(&mut speed, 0.25..=4.0)
+                .step_by(0.05)
+                .text("×"),
+        );
     });
     if (speed - snapshot.speed).abs() > 1e-3 {
         let mut s = app.state.write();
@@ -103,7 +128,8 @@ fn render_clip_props(app: &mut EdtApp, ui: &mut Ui, clip_id: edt_core::id::Id) {
                 if let Some(clip) = track.clips.iter_mut().find(|c| c.id == clip_id) {
                     clip.speed = edt_core::timeline::ClipSpeed(speed);
                     let src_dur = clip.source.duration().0;
-                    clip.timeline_end = edt_core::time::Time(clip.timeline_start.0 + src_dur / speed);
+                    clip.timeline_end =
+                        edt_core::time::Time(clip.timeline_start.0 + src_dur / speed);
                     s.mark_dirty();
                 }
             }
@@ -142,8 +168,16 @@ fn render_clip_props(app: &mut EdtApp, ui: &mut Ui, clip_id: edt_core::id::Id) {
     }
 
     ui.separator();
-    ui.label(egui::RichText::new("Effects (roadmap)").color(TEXT_DIM).size(11.0));
-    ui.label(egui::RichText::new("Color grade, blur, text — coming in v0.2.").color(TEXT_DIM).small());
+    ui.label(
+        egui::RichText::new("Effects (roadmap)")
+            .color(TEXT_DIM)
+            .size(11.0),
+    );
+    ui.label(
+        egui::RichText::new("Color grade, blur, text — coming in v0.2.")
+            .color(TEXT_DIM)
+            .small(),
+    );
 
     ui.separator();
     ui.label(egui::RichText::new("Actions").color(TEXT).size(12.0));
@@ -214,7 +248,12 @@ fn render_track_props(app: &mut EdtApp, ui: &mut Ui, track_id: edt_core::id::Id)
 }
 
 fn render_project_props(app: &mut EdtApp, ui: &mut Ui) {
-    ui.label(egui::RichText::new("Project").strong().color(TEXT).size(13.0));
+    ui.label(
+        egui::RichText::new("Project")
+            .strong()
+            .color(TEXT)
+            .size(13.0),
+    );
     ui.separator();
 
     let snapshot = {
@@ -233,16 +272,30 @@ fn render_project_props(app: &mut EdtApp, ui: &mut Ui) {
     };
 
     ui.label(format!("Name: {}", snapshot.name));
-    ui.label(format!("Resolution: {}×{}", snapshot.width, snapshot.height));
+    ui.label(format!(
+        "Resolution: {}×{}",
+        snapshot.width, snapshot.height
+    ));
     ui.label(format!("Framerate: {:.2} fps", snapshot.fps));
-    ui.label(format!("Audio: {}Hz · {}ch", snapshot.audio_sample_rate, snapshot.audio_channels));
+    ui.label(format!(
+        "Audio: {}Hz · {}ch",
+        snapshot.audio_sample_rate, snapshot.audio_channels
+    ));
     ui.label(format!("Assets: {}", snapshot.asset_count));
     ui.label(format!("Tracks: {}", snapshot.track_count));
     ui.label(format!("Duration: {:.3}s", snapshot.duration));
 
     ui.separator();
-    ui.label(egui::RichText::new("Nothing selected").color(TEXT_DIM).small());
-    ui.label(egui::RichText::new("Click a clip in the timeline to edit its properties.").color(TEXT_DIM).small());
+    ui.label(
+        egui::RichText::new("Nothing selected")
+            .color(TEXT_DIM)
+            .small(),
+    );
+    ui.label(
+        egui::RichText::new("Click a clip in the timeline to edit its properties.")
+            .color(TEXT_DIM)
+            .small(),
+    );
 }
 
 #[derive(Debug, Clone)]

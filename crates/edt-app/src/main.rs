@@ -22,9 +22,7 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "edt",
         opts,
-        Box::new(move |cc| {
-            Ok(Box::new(EdtApp::new(cc)))
-        }),
+        Box::new(move |cc| Ok(Box::new(EdtApp::new(cc)))),
     )
 }
 
