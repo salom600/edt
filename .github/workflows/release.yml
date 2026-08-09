@@ -99,7 +99,7 @@ jobs:
         with:
           name: release-${{ matrix.artifact_name }}
           path: |
-            edt-${{ matrix.artifact_name }}.*
+            ${{ matrix.artifact_name }}.*
           if-no-files-found: error
           retention-days: 90
 
