@@ -1,13 +1,12 @@
 //! Export dialog — modal window for configuring and running an export.
 
 use crate::app::EdtApp;
-use crate::ui::{ACCENT, TEXT, TEXT_DIM, WIDGET_BG};
+use crate::ui::{ACCENT, TEXT};
 use edt_core::export::{ExportAudioCodec, ExportFormat, ExportSettings, ExportVideoCodec};
 use edt_export::{ExportOptions, ExportStrategy, ProgressUpdate};
 use eframe::egui;
 use egui::{Color32, Context, Ui};
 use std::path::PathBuf;
-use std::sync::Arc;
 
 pub struct ExportDialogState {
     pub settings: ExportSettings,
@@ -86,7 +85,7 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
         .show(ui, |ui| {
             ui.label("Format");
             let mut fmt = s.format;
-            egui::ComboBox::from_id_source("fmt")
+            egui::ComboBox::from_id_salt("fmt")
                 .selected_text(format!("{:?}", fmt))
                 .show_ui(ui, |ui| {
                     ui.selectable_value(&mut fmt, ExportFormat::Mp4, "MP4");
@@ -98,7 +97,7 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
             ui.end_row();
 
             ui.label("Codec");
-            egui::ComboBox::from_id_source("vcodec")
+            egui::ComboBox::from_id_salt("vcodec")
                 .selected_text(format!("{:?}", s.video_codec))
                 .show_ui(ui, |ui| {
                     ui.selectable_value(
@@ -154,7 +153,7 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
         .striped(true)
         .show(ui, |ui| {
             ui.label("Codec");
-            egui::ComboBox::from_id_source("acodec")
+            egui::ComboBox::from_id_salt("acodec")
                 .selected_text(format!("{:?}", s.audio_codec))
                 .show_ui(ui, |ui| {
                     ui.selectable_value(&mut s.audio_codec, ExportAudioCodec::Aac, "AAC");
@@ -175,7 +174,7 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
 
             ui.label("Sample rate");
             let sr_opts = [44100, 48000, 96000];
-            egui::ComboBox::from_id_source("sr")
+            egui::ComboBox::from_id_salt("sr")
                 .selected_text(format!("{} Hz", s.audio_sample_rate))
                 .show_ui(ui, |ui| {
                     for &sr in &sr_opts {
@@ -186,7 +185,7 @@ fn render_form(app: &mut EdtApp, ui: &mut Ui) {
 
             ui.label("Channels");
             let ch_opts = [(1, "Mono"), (2, "Stereo"), (6, "5.1"), (8, "7.1")];
-            egui::ComboBox::from_id_source("ch")
+            egui::ComboBox::from_id_salt("ch")
                 .selected_text(format!("{}", s.audio_channels))
                 .show_ui(ui, |ui| {
                     for (n, label) in ch_opts {

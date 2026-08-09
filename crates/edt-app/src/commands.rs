@@ -78,6 +78,7 @@ impl UndoStack {
 // ---------------------------------------------------------------------------
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct AddClipCmd {
     pub clip: Clip,
     pub track_id: Id,
@@ -130,6 +131,7 @@ impl Command for DeleteClipCmd {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct MoveClipCmd {
     pub clip_id: Id,
     pub track_id: Id,

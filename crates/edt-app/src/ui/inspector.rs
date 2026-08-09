@@ -307,6 +307,7 @@ fn render_project_props(app: &mut EdtApp, ui: &mut Ui) {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ClipSnapshot {
     id: edt_core::id::Id,
     name: String,
@@ -321,6 +322,7 @@ struct ClipSnapshot {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct TrackSnapshot {
     name: String,
     kind: edt_core::timeline::TrackKind,

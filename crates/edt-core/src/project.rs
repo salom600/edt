@@ -79,10 +79,10 @@ impl Project {
     /// Create a new empty project with a fresh id generator.
     pub fn new() -> (Self, IdGenerator) {
         let gen = IdGenerator::new();
-        let mut p = Self::default();
-        // Pre-seed the timeline with two video and two audio tracks so the
-        // user has somewhere to drop clips immediately.
-        p.timeline = Timeline::with_default_tracks(&gen);
+        let p = Self {
+            timeline: Timeline::with_default_tracks(&gen),
+            ..Self::default()
+        };
         (p, gen)
     }
 

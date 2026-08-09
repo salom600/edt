@@ -19,8 +19,7 @@ use crate::app::EdtApp;
 use crate::state::Selection;
 use crate::ui::{panel_header, PLAYHEAD, SELECTION, TEXT_DIM, TRACK_AUDIO, TRACK_VIDEO, WIDGET_BG};
 use eframe::egui;
-use egui::{Color32, Context, PointerButton, Rect, Response, Sense, Ui, Vec2};
-use std::collections::HashSet;
+use egui::{Color32, Context, PointerButton, Rect, Sense, Ui};
 
 const HEADER_W: f32 = 110.0;
 const TRACK_H: f32 = 56.0;
@@ -253,7 +252,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                 Color32::from_rgb(20, 22, 26),
             );
             if is_selected {
-                painter.rect_stroke(clip_rect, 2.0, egui::Stroke::new(2.0, SELECTION));
+                painter.rect_stroke(clip_rect, 2.0, egui::Stroke::new(2.0_f32, SELECTION));
             }
             // Trim handles (4px on each edge).
             let left_handle =
@@ -282,7 +281,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                 egui::pos2(body_rect.min.x, track_y + TRACK_H),
                 egui::pos2(body_rect.max.x, track_y + TRACK_H),
             ],
-            egui::Stroke::new(1.0, Color32::from_rgb(40, 42, 50)),
+            egui::Stroke::new(1.0_f32, Color32::from_rgb(40, 42, 50)),
         );
     }
 
@@ -295,7 +294,7 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
                 egui::pos2(playhead_x, ruler_rect.min.y),
                 egui::pos2(playhead_x, body_rect.max.y),
             ],
-            egui::Stroke::new(2.0, PLAYHEAD),
+            egui::Stroke::new(2.0_f32, PLAYHEAD),
         );
         // Triangle at top.
         let tri = vec![
@@ -524,7 +523,7 @@ fn draw_ruler(painter: &egui::Painter, rect: Rect, zoom: f64, scroll: f64) {
         if x >= rect.min.x && x <= rect.max.x {
             painter.line_segment(
                 [egui::pos2(x, rect.min.y + 8.0), egui::pos2(x, rect.max.y)],
-                egui::Stroke::new(1.0, Color32::from_rgb(70, 75, 85)),
+                egui::Stroke::new(1.0_f32, Color32::from_rgb(70, 75, 85)),
             );
             painter.text(
                 egui::pos2(x + 3.0, rect.min.y + 4.0),
@@ -584,10 +583,8 @@ fn snap_to_edges(
     let mut best: Option<(f64, f64)> = None;
     for &c in &candidates {
         let dist = (c - t).abs();
-        if dist < threshold {
-            if best.map(|(_, bd)| dist < bd).unwrap_or(true) {
-                best = Some((c, dist));
-            }
+        if dist < threshold && best.map(|(_, bd)| dist < bd).unwrap_or(true) {
+            best = Some((c, dist));
         }
     }
     best.map(|(v, _)| v)

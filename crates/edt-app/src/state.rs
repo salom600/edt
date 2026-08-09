@@ -5,7 +5,7 @@
 //! timeline data lives in the project; this struct adds the bits that
 //! never need to be persisted.
 
-use edt_core::id::{Id, IdGenerator};
+use edt_core::id::Id;
 use edt_core::media::MediaAsset;
 use edt_core::project::Project;
 use edt_core::time::Time;
@@ -14,30 +14,20 @@ use parking_lot::RwLock;
 use std::sync::Arc;
 
 /// A timeline selection. Either nothing, a clip, or a track.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Selection {
+    #[default]
     None,
     Clip(Id),
     Track(Id),
 }
 
-impl Default for Selection {
-    fn default() -> Self {
-        Selection::None
-    }
-}
-
 /// Playback state.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum PlayState {
+    #[default]
     Paused,
     Playing,
-}
-
-impl Default for PlayState {
-    fn default() -> Self {
-        PlayState::Paused
-    }
 }
 
 /// The full editor state, wrapped in a `RwLock` so background jobs can
@@ -65,7 +55,7 @@ pub struct EditorStateInner {
 
 impl EditorState {
     pub fn new() -> Arc<Self> {
-        let (project, gen) = Project::new();
+        let (project, _gen) = Project::new();
         let inner = EditorStateInner {
             project,
             id_gen_seq: 0,
@@ -255,7 +245,7 @@ impl EditorStateInner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use edt_core::media::{MediaAsset, MediaKind, MediaMetadata, VideoInfo};
+    use edt_core::media::{MediaAsset, MediaMetadata, VideoInfo};
 
     fn fake_asset(id: Id, name: &str, dur: f64) -> MediaAsset {
         MediaAsset {

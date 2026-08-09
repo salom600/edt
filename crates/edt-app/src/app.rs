@@ -1,8 +1,8 @@
 //! The top-level editor application.
 
-use crate::background::{BackgroundJobs, JobResult};
-use crate::commands::{AddClipCmd, DeleteClipCmd, SplitClipCmd, UndoStack};
-use crate::state::{EditorState, EditorStateInner, Selection};
+use crate::background::BackgroundJobs;
+use crate::commands::{DeleteClipCmd, SplitClipCmd, UndoStack};
+use crate::state::{EditorState, Selection};
 use crate::ui::export_dialog::ExportDialogState;
 use crate::ui::menubar::MenuState;
 use crate::ui::preview::PreviewCache;
@@ -11,13 +11,11 @@ use crate::ui::{
     apply_theme, export_dialog, inspector, media_pool, menubar, preview, timeline, ThumbCache,
 };
 use edt_core::id::Id;
-use edt_core::media::{MediaAsset, MediaMetadata};
-use edt_core::project::{Project, ProjectFile};
+use edt_core::media::MediaAsset;
+use edt_core::project::Project;
 use edt_core::time::Time;
-use edt_core::timeline::{Clip, ClipSource};
 use eframe::egui;
-use egui::{Context, Ui};
-use parking_lot::Mutex;
+use egui::Context;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};

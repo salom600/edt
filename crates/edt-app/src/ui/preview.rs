@@ -2,7 +2,7 @@
 //! transport controls (play/pause, scrub, frame step).
 
 use crate::app::EdtApp;
-use crate::ui::{panel_header, PLAYHEAD, TEXT_DIM, WIDGET_BG};
+use crate::ui::{panel_header, TEXT_DIM, WIDGET_BG};
 use eframe::egui;
 use egui::{Color32, Context, Sense, Ui};
 use std::collections::HashMap;
@@ -11,22 +11,14 @@ use std::time::Instant;
 /// Cache of decoded preview frames keyed by their timeline frame index.
 /// The cache holds at most `CAP` entries (LRU eviction is approximate —
 /// we just drop everything when full for simplicity).
+#[derive(Default)]
 pub struct PreviewCache {
     pub frames: HashMap<u64, egui::TextureHandle>,
     pub last_request: Option<u64>,
     pub last_request_at: Option<Instant>,
 }
 
-impl Default for PreviewCache {
-    fn default() -> Self {
-        Self {
-            frames: HashMap::new(),
-            last_request: None,
-            last_request_at: None,
-        }
-    }
-}
-
+#[allow(dead_code)]
 const CAP: usize = 32;
 
 pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
@@ -145,10 +137,11 @@ pub fn render(app: &mut EdtApp, ctx: &Context, ui: &mut Ui) {
     // ---- Transport bar ----
     let (transport_rect, _) =
         ui.allocate_exact_size(egui::vec2(canvas_w, transport_h), Sense::click());
-    let transport = ui.painter().with_clip_rect(transport_rect);
+    let _transport = ui.painter().with_clip_rect(transport_rect);
 
     ui.painter().rect_filled(transport_rect, 4.0, WIDGET_BG);
 
+    #[allow(deprecated)]
     ui.allocate_ui_at_rect(transport_rect.shrink2(egui::vec2(8.0, 4.0)), |ui| {
         ui.horizontal_centered(|ui| {
             // Skip to start.

@@ -3,6 +3,7 @@
 use egui::Color32;
 
 /// Standard clip label color based on track kind.
+#[allow(dead_code)]
 pub fn clip_label_color(is_video: bool) -> Color32 {
     if is_video {
         Color32::from_rgb(180, 215, 255)

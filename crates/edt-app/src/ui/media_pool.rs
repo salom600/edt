@@ -2,12 +2,10 @@
 
 use crate::app::EdtApp;
 use crate::state::Selection;
-use crate::ui::{label_color, panel_header, ACCENT, TEXT_DIM, WIDGET_BG};
+use crate::ui::{label_color, panel_header, TEXT_DIM, WIDGET_BG};
 use eframe::egui;
-use egui::{Color32, Context, Response, Sense, Ui};
+use egui::{Color32, Context, Sense, Ui};
 use std::collections::HashMap;
-use std::path::PathBuf;
-use std::sync::Arc;
 
 /// Cached thumbnails keyed by asset id. The app owns this so it survives
 /// panel rebuilds.

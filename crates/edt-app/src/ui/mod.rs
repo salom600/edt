@@ -39,14 +39,14 @@ pub fn apply_theme(ctx: &Context) {
     visuals.extreme_bg_color = Color32::from_rgb(12, 14, 18);
     visuals.faint_bg_color = WIDGET_BG;
     visuals.widgets.noninteractive.bg_fill = WIDGET_BG;
-    visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, TEXT_DIM);
+    visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0_f32, TEXT_DIM);
     visuals.widgets.inactive.bg_fill = WIDGET_BG;
-    visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0, TEXT);
+    visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0_f32, TEXT);
     visuals.widgets.hovered.bg_fill = WIDGET_HOVER;
-    visuals.widgets.hovered.fg_stroke = egui::Stroke::new(1.0, TEXT);
+    visuals.widgets.hovered.fg_stroke = egui::Stroke::new(1.0_f32, TEXT);
     visuals.widgets.active.bg_fill = ACCENT;
     visuals.selection.bg_fill = ACCENT.linear_multiply(0.4);
-    visuals.selection.stroke = egui::Stroke::new(1.0, ACCENT);
+    visuals.selection.stroke = egui::Stroke::new(1.0_f32, ACCENT);
     visuals.hyperlink_color = ACCENT;
     ctx.set_visuals(visuals);
 }
